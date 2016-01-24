@@ -5,14 +5,49 @@
     displayName: 'App',
 
     getInitialState: function getInitialState() {
+      var baseWeaponConfig = {
+        id: 0,
+        plus: 0,
+        level: 100,
+        skillLevel: 10,
+        overLimit: 3
+      };
+      var baseSummonConfig = {
+        id: 0,
+        plus: 0,
+        level: 100,
+        overLimit: 3
+      };
       return {
-        search: '',
         weapons: ['', '', '', '', '', '', '', '', '', ''],
         summons: ['', '', '', '', ''],
-        weaponConfig: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
-        summonConfig: [{}, {}, {}, {}, {}],
+        weaponConfig: [Object.assign({}, baseWeaponConfig), Object.assign({}, baseWeaponConfig), Object.assign({}, baseWeaponConfig), Object.assign({}, baseWeaponConfig), Object.assign({}, baseWeaponConfig), Object.assign({}, baseWeaponConfig), Object.assign({}, baseWeaponConfig), Object.assign({}, baseWeaponConfig), Object.assign({}, baseWeaponConfig), Object.assign({}, baseWeaponConfig)],
+        summonConfig: [Object.assign({}, baseSummonConfig), Object.assign({}, baseSummonConfig), Object.assign({}, baseSummonConfig), Object.assign({}, baseSummonConfig), Object.assign({}, baseSummonConfig)],
         characterConfig: {}
       };
+    },
+    onPlusChange: function onPlusChange(evt) {
+      console.log(evt);
+      var tr = $(evt.target).closest('tr')[0];
+      var type = tr.dataset.type;
+      var slot = tr.dataset.slot;
+      var value = +$(evt.target).find(':selected').text();
+      console.log(slot, value);
+      this.setState(function (previuosState) {
+        if (type === 'weapon') {
+          var weaponConfig = previuosState.weaponConfig;
+          weaponConfig[+slot].plus = value;
+          return {
+            weaponConfig: weaponConfig
+          };
+        } else {
+          var summonConfig = previuosState.summonConfig;
+          summonConfig[+slot].plus = value;
+          return {
+            summonConfig: summonConfig
+          };
+        }
+      });
     },
     componentDidMount: function componentDidMount() {
       this.ref = new Firebase('https://gbf-item-database.firebaseio.com');
@@ -110,6 +145,59 @@
       var skill1 = weaponData[6];
       var skill2 = weaponData[7];
     },
+    calculateRealAtk: function calculateRealAtk(config) {
+      var weaponData = this.getWeaponState(config.id);
+      var isFinalEvo = weaponData[14] !== '';
+      if (isFinalEvo) {
+        var diff = Math.ceil((weaponData[11] - weaponData[9]) / 100);
+        var diff2 = Math.ceil((weaponData[11] - weaponData[9]) / 100);
+        if (+diff === 1) {
+          return {
+            attack: weaponData[9] + 5 * config.plus,
+            hp: weaponData[8] + 1 * config.plus
+          };
+        } else if (+diff === 100) {
+          return {
+            attack: weaponData[11] + 5 * config.plus,
+            hp: weaponData[10] + 1 * config.plus
+          };
+        } else if (+config.level === 2) {
+          return {
+            attack: weaponData[9] + diff * 2 + 5 * config.plus,
+            hp: weaponData[8] + diff * 2 + config.plus
+          };
+        } else {
+          return {
+            attack: weaponData[9] + diff * config.level + 5 * config.plus,
+            hp: weaponData[8] + diff * config.level + config.plus
+          };
+        }
+      } else {
+        var diff = Math.ceil((weaponData[11] - weaponData[9]) / 100);
+        if (+diff === 1) {
+          return {
+            attack: weaponData[9] + 5 * config.plus,
+            hp: weaponData[8] + 1 * config.plus
+          };
+        } else if (+diff === 100) {
+          return {
+            attack: weaponData[11] + 5 * config.plus,
+            hp: weaponData[10] + 1 * config.plus
+          };
+        } else if (+config.level === 2) {
+          return {
+            attack: weaponData[9] + diff * 2 + 5 * config.plus,
+            hp: weaponData[8] + diff * 2 + config.plus
+          };
+        } else {
+          return {
+            attack: weaponData[9] + diff * config.level + 5 * config.plus,
+            hp: weaponData[8] + diff * config.level + config.plus
+          };
+        }
+      }
+    },
+    calculateRealHp: function calculateRealHp() {},
     render: function render() {
       var totalWeaponHp = 0;
       var totalWeaponAtk = 0;
@@ -120,8 +208,10 @@
           return '';
         } else if (weapon) {
           var weaponData = this.getWeaponState(weapon);
-          totalWeaponAtk += +weaponData[11];
-          totalWeaponHp += +weaponData[10];
+          var realAtk = +weaponData[11] + 5 * this.state.weaponConfig[index].plus;
+          var realHp = +weaponData[10] + this.state.weaponConfig[index].plus;
+          totalWeaponAtk += realAtk;
+          totalWeaponHp += realHp;
           return React.createElement(
             'div',
             { className: 'lis-weapon-sub', 'data-slot': index },
@@ -130,7 +220,12 @@
               { className: 'btn-weapon rarity-4' },
               React.createElement('img', { className: 'img-weapon-sub', src: "http://gbf.game-a.mbga.jp/assets/img/sp/assets/weapon/m/" + weapon + ".jpg" }),
               React.createElement('div', { className: 'shining-1' }),
-              React.createElement('div', { className: 'shining-2' })
+              React.createElement('div', { className: 'shining-2' }),
+              React.createElement(
+                'div',
+                { className: 'prt-quality' },
+                this.state.weaponConfig[index].plus ? '+' + this.state.weaponConfig[index].plus : ''
+              )
             ),
             React.createElement(
               'div',
@@ -141,8 +236,8 @@
                 React.createElement('div', { className: 'ico-hp' }),
                 React.createElement(
                   'div',
-                  { className: 'txt-hp-value', title: weaponData[10] },
-                  weaponData[10]
+                  { className: 'txt-hp-value', title: realHp },
+                  realHp
                 )
               ),
               React.createElement(
@@ -151,8 +246,8 @@
                 React.createElement('div', { className: 'ico-atk' }),
                 React.createElement(
                   'div',
-                  { className: 'txt-atk-value', title: weaponData[11] },
-                  weaponData[11]
+                  { className: 'txt-atk-value', title: realAtk },
+                  realAtk
                 )
               )
             )
@@ -200,8 +295,10 @@
         );
       } else {
         var weaponData = this.getWeaponState(this.state.weapons[0]);
-        totalWeaponAtk += +weaponData[11];
-        totalWeaponHp += +weaponData[10];
+        var realAtk = +weaponData[11] + 5 * this.state.weaponConfig[0].plus;
+        var realHp = +weaponData[10] + this.state.weaponConfig[0].plus;
+        totalWeaponAtk += realAtk;
+        totalWeaponHp += realHp;
         mainWeaponDOM = React.createElement(
           'div',
           { className: 'cnt-weapon-main', 'data-slot': '0' },
@@ -217,7 +314,12 @@
             React.createElement(
               'div',
               { className: 'btn-weapon' },
-              React.createElement('img', { className: 'img-weapon-main', src: "http://gbf.game-a.mbga.jp/assets/img/sp/assets/weapon/ls/" + this.state.weapons[0] + ".jpg" })
+              React.createElement('img', { className: 'img-weapon-main', src: "http://gbf.game-a.mbga.jp/assets/img/sp/assets/weapon/ls/" + this.state.weapons[0] + ".jpg" }),
+              React.createElement(
+                'div',
+                { className: 'prt-quality' },
+                this.state.weaponConfig[0].plus ? '+' + this.state.weaponConfig[0].plus : ''
+              )
             )
           ),
           React.createElement(
@@ -229,8 +331,8 @@
               React.createElement('div', { className: 'ico-hp' }),
               React.createElement(
                 'div',
-                { className: 'txt-hp-value', title: weaponData[10] },
-                weaponData[10]
+                { className: 'txt-hp-value', title: realHp },
+                realHp
               )
             ),
             React.createElement(
@@ -239,8 +341,8 @@
               React.createElement('div', { className: 'ico-atk' }),
               React.createElement(
                 'div',
-                { className: 'txt-atk-value', title: weaponData[11] },
-                weaponData[11]
+                { className: 'txt-atk-value', title: realAtk },
+                realAtk
               )
             )
           )
@@ -249,8 +351,10 @@
       var mainSummonDOM = '';
       if (this.state.summons[0]) {
         var summonData = this.getSummonState(this.state.summons[0]);
-        totalSummonHp += +summonData[10];
-        totalSummonAtk += +summonData[11];
+        var realAtk = +summonData[11] + 5 * this.state.summonConfig[0].plus;
+        var realHp = +summonData[10] + this.state.summonConfig[0].plus;
+        totalSummonHp += realHp;
+        totalSummonAtk += realAtk;
         var attribute = 2;
         switch (summonData[2]) {
           case '火':
@@ -288,7 +392,12 @@
                 React.createElement('div', { className: "icon_type_b_" + attribute })
               ),
               React.createElement('div', { className: 'shining-1' }),
-              React.createElement('div', { className: 'shining-2' })
+              React.createElement('div', { className: 'shining-2' }),
+              React.createElement(
+                'div',
+                { className: 'prt-quality' },
+                this.state.summonConfig[0].plus ? '+' + this.state.summonConfig[0].plus : ''
+              )
             )
           ),
           React.createElement(
@@ -300,8 +409,8 @@
               React.createElement('div', { className: 'ico-hp' }),
               React.createElement(
                 'div',
-                { className: 'txt-hp-value', title: summonData[10] },
-                summonData[10]
+                { className: 'txt-hp-value', title: realHp },
+                realHp
               )
             ),
             React.createElement(
@@ -310,8 +419,8 @@
               React.createElement('div', { className: 'ico-atk' }),
               React.createElement(
                 'div',
-                { className: 'txt-atk-value', title: summonData[11] },
-                summonData[11]
+                { className: 'txt-atk-value', title: realAtk },
+                realAtk
               )
             )
           )
@@ -359,8 +468,10 @@
           return '';
         } else if (summon) {
           var summonData = this.getSummonState(summon);
-          totalSummonHp += +summonData[10];
-          totalSummonAtk += +summonData[11];
+          var realHp = +summonData[10] + this.state.summonConfig[index].plus;
+          var realAtk = +summonData[11] + 5 * this.state.summonConfig[index].plus;
+          totalSummonHp += realHp;
+          totalSummonAtk += realAtk;
           return React.createElement(
             'div',
             { className: 'lis-summon-sub' },
@@ -374,7 +485,12 @@
                 React.createElement('div', { className: 'icon_type_6' })
               ),
               React.createElement('div', { className: 'shining-1' }),
-              React.createElement('div', { className: 'shining-2' })
+              React.createElement('div', { className: 'shining-2' }),
+              React.createElement(
+                'div',
+                { className: 'prt-quality' },
+                this.state.summonConfig[index].plus ? '+' + this.state.summonConfig[index].plus : ''
+              )
             ),
             React.createElement(
               'div',
@@ -385,8 +501,8 @@
                 React.createElement('div', { className: 'ico-hp' }),
                 React.createElement(
                   'div',
-                  { className: 'txt-hp-value', title: summonData[10] },
-                  summonData[10]
+                  { className: 'txt-hp-value', title: realHp },
+                  realHp
                 )
               ),
               React.createElement(
@@ -395,8 +511,8 @@
                 React.createElement('div', { className: 'ico-atk' }),
                 React.createElement(
                   'div',
-                  { className: 'txt-atk-value', title: summonData[11] },
-                  summonData[11]
+                  { className: 'txt-atk-value', title: realAtk },
+                  realAtk
                 )
               )
             )
@@ -447,7 +563,7 @@
             var weaponData = this.getWeaponState(weapon);
             rows.push(React.createElement(
               'tr',
-              null,
+              { 'data-type': 'weapon', 'data-slot': index, key: "weapon-config-" + index },
               React.createElement(
                 'td',
                 { className: 'list-item' },
@@ -477,7 +593,7 @@
                 null,
                 React.createElement(
                   'select',
-                  { className: 'plus' },
+                  { className: 'plus', onChange: this.onPlusChange },
                   from100
                 )
               ),
@@ -496,6 +612,151 @@
         weaponConfigDOM = React.createElement(
           'table',
           { className: 'table table-condensed table-striped table-hover' },
+          React.createElement(
+            'thead',
+            null,
+            React.createElement(
+              'tr',
+              null,
+              React.createElement('th', null),
+              React.createElement(
+                'th',
+                null,
+                'Slot'
+              ),
+              React.createElement(
+                'th',
+                null,
+                'Name'
+              ),
+              React.createElement(
+                'th',
+                null,
+                'level'
+              ),
+              React.createElement(
+                'th',
+                null,
+                'Plus'
+              ),
+              React.createElement(
+                'th',
+                null,
+                'Skill level'
+              ),
+              React.createElement(
+                'th',
+                null,
+                'Over limit'
+              )
+            )
+          ),
+          React.createElement(
+            'tbody',
+            null,
+            rows
+          )
+        );
+      }
+      var summonConfigDOM = '';
+      if (totalSummonAtk) {
+        var from150 = [],
+            from15 = [],
+            from100 = [];
+        for (var i = 1; i <= 150; i++) {
+          from150.push(React.createElement(
+            'option',
+            { value: i },
+            i
+          ));
+        }
+        for (var i = 0; i < 100; i++) {
+          from100.push(React.createElement(
+            'option',
+            { value: i },
+            i
+          ));
+        }
+        var rows = [];
+        this.state.summons.forEach(function (summon, index) {
+          if (summon) {
+            var summonData = this.getSummonState(summon);
+            rows.push(React.createElement(
+              'tr',
+              { 'data-type': 'summon', 'data-slot': index, key: "summon-config-" + index },
+              React.createElement(
+                'td',
+                { className: 'list-item' },
+                React.createElement('img', { src: "http://gbf.game-a.mbga.jp/assets/img/sp/assets/summon/party_sub/" + summon + ".jpg" })
+              ),
+              React.createElement(
+                'td',
+                null,
+                index + 1
+              ),
+              React.createElement(
+                'td',
+                null,
+                summonData[1]
+              ),
+              React.createElement(
+                'td',
+                null,
+                React.createElement(
+                  'select',
+                  { className: 'level' },
+                  from150
+                )
+              ),
+              React.createElement(
+                'td',
+                null,
+                React.createElement(
+                  'select',
+                  { className: 'plus', onChange: this.onPlusChange },
+                  from100
+                )
+              )
+            ));
+          } else {}
+        }, this);
+        summonConfigDOM = React.createElement(
+          'table',
+          { className: 'table table-condensed table-striped table-hover' },
+          React.createElement(
+            'thead',
+            null,
+            React.createElement(
+              'tr',
+              null,
+              React.createElement('th', null),
+              React.createElement(
+                'th',
+                null,
+                'Slot'
+              ),
+              React.createElement(
+                'th',
+                null,
+                'Name'
+              ),
+              React.createElement(
+                'th',
+                null,
+                'level'
+              ),
+              React.createElement(
+                'th',
+                null,
+                'Plus'
+              ),
+              React.createElement(
+                'th',
+                null,
+                'Over limit'
+              )
+            )
+          ),
           React.createElement(
             'tbody',
             null,
@@ -587,6 +848,7 @@
           )
         ),
         weaponConfigDOM,
+        summonConfigDOM,
         React.createElement(WeaponSelector, { weapons: window.SSR_WEAPON_RAW }),
         React.createElement(SummonSelector, { summons: window.SSR_SUMMON_RAW })
       );

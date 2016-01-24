@@ -3,14 +3,53 @@
 (function(exports) {
   exports.App = React.createClass({
     getInitialState: function() {
+      var baseWeaponConfig = {
+        id: 0,
+        plus: 0,
+        level: 100,
+        skillLevel: 10,
+        overLimit: 3
+      };
+      var baseSummonConfig = {
+        id: 0,
+        plus: 0,
+        level: 100,
+        overLimit: 3
+      }
       return {
-        search: '',
         weapons: ['', '', '', '', '', '', '', '', '', ''],
         summons: ['', '', '', '', ''],
-        weaponConfig: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
-        summonConfig: [{}, {}, {}, {}, {}],
+        weaponConfig: [Object.assign({}, baseWeaponConfig), Object.assign({}, baseWeaponConfig), Object.assign({}, baseWeaponConfig),
+                       Object.assign({}, baseWeaponConfig), Object.assign({}, baseWeaponConfig), Object.assign({}, baseWeaponConfig),
+                       Object.assign({}, baseWeaponConfig), Object.assign({}, baseWeaponConfig), Object.assign({}, baseWeaponConfig),
+                       Object.assign({}, baseWeaponConfig)],
+        summonConfig: [Object.assign({}, baseSummonConfig), Object.assign({}, baseSummonConfig), Object.assign({}, baseSummonConfig),
+                       Object.assign({}, baseSummonConfig), Object.assign({}, baseSummonConfig)],
         characterConfig: {}
       }
+    },
+    onPlusChange: function(evt) {
+      console.log(evt);
+      var tr = $(evt.target).closest('tr')[0];
+      var type = tr.dataset.type;
+      var slot = tr.dataset.slot;
+      var value = +$(evt.target).find(':selected').text();
+      console.log(slot, value);
+      this.setState(function(previuosState) {
+        if (type === 'weapon') {
+          var weaponConfig = previuosState.weaponConfig;
+          weaponConfig[+slot].plus = value;
+          return {
+            weaponConfig: weaponConfig
+          }
+        } else {
+          var summonConfig = previuosState.summonConfig;
+          summonConfig[+slot].plus = value;
+          return {
+            summonConfig: summonConfig
+          }
+        }
+      });
     },
     componentDidMount: function() {
       this.ref = new Firebase('https://gbf-item-database.firebaseio.com');
@@ -124,6 +163,61 @@
       var skill1 = weaponData[6];
       var skill2 = weaponData[7];
     },
+    calculateRealAtk: function(config) {
+      var weaponData = this.getWeaponState(config.id);
+      var isFinalEvo = (weaponData[14] !== '');
+      if (isFinalEvo) {
+        var diff = Math.ceil((weaponData[11] - weaponData[9]) / 100);
+        var diff2 = Math.ceil((weaponData[11] - weaponData[9]) / 100);
+        if (+diff === 1) {
+          return {
+            attack: weaponData[9] + 5 * config.plus,
+            hp: weaponData[8] + 1 * config.plus
+          }
+        } else if (+diff === 100) {
+          return {
+            attack: weaponData[11] + 5 * config.plus,
+            hp: weaponData[10] + 1 * config.plus
+          }
+        } else if (+config.level === 2) {
+          return {
+            attack: weaponData[9] + diff * 2 + 5 * config.plus,
+            hp: weaponData[8] + diff * 2 + config.plus
+          }
+        } else {
+          return {
+            attack: weaponData[9] + diff * config.level + 5 * config.plus,
+            hp: weaponData[8] + diff * config.level + config.plus
+          }
+        }
+      } else {
+        var diff = Math.ceil((weaponData[11] - weaponData[9]) / 100);
+        if (+diff === 1) {
+          return {
+            attack: weaponData[9] + 5 * config.plus,
+            hp: weaponData[8] + 1 * config.plus
+          }
+        } else if (+diff === 100) {
+          return {
+            attack: weaponData[11] + 5 * config.plus,
+            hp: weaponData[10] + 1 * config.plus
+          }
+        } else if (+config.level === 2) {
+          return {
+            attack: weaponData[9] + diff * 2 + 5 * config.plus,
+            hp: weaponData[8] + diff * 2 + config.plus
+          }
+        } else {
+          return {
+            attack: weaponData[9] + diff * config.level + 5 * config.plus,
+            hp: weaponData[8] + diff * config.level + config.plus
+          }
+        }
+      }
+    },
+    calculateRealHp: function() {
+
+    },
     render: function() {
       var totalWeaponHp = 0;
       var totalWeaponAtk = 0;
@@ -134,27 +228,30 @@
           return '';
         } else if (weapon) {
           var weaponData = this.getWeaponState(weapon);
-          totalWeaponAtk += +weaponData[11];
-          totalWeaponHp += +weaponData[10];
+          var realAtk = +weaponData[11] + 5 * this.state.weaponConfig[index].plus;
+          var realHp = +weaponData[10] + this.state.weaponConfig[index].plus;
+          totalWeaponAtk += realAtk;
+          totalWeaponHp += realHp;
           return  <div className="lis-weapon-sub" data-slot={index}>
               <div className="btn-weapon rarity-4">
                 <img className="img-weapon-sub" src={"http://gbf.game-a.mbga.jp/assets/img/sp/assets/weapon/m/"+weapon+".jpg"} />
                 <div className="shining-1"></div>
                 <div className="shining-2"></div>
+                <div className="prt-quality">{this.state.weaponConfig[index].plus  ? '+' + this.state.weaponConfig[index].plus : ''}</div>
               </div>
               <div className="prt-weapon-sub-status">
                 <div className="prt-hp">
                   <div className="ico-hp"></div>
                   
-                  <div className="txt-hp-value" title={weaponData[10]}>
-                    {weaponData[10]}
+                  <div className="txt-hp-value" title={realHp}>
+                    {realHp}
                   </div>
                 </div>
                 <div className="prt-attack">
                   <div className="ico-atk"></div>
                   
-                  <div className="txt-atk-value" title={weaponData[11]}>
-                    {weaponData[11]}
+                  <div className="txt-atk-value" title={realAtk}>
+                    {realAtk}
                   </div>
                 </div>
               </div>
@@ -191,8 +288,10 @@
           </div>
       } else {
         var weaponData = this.getWeaponState(this.state.weapons[0]);
-          totalWeaponAtk += +weaponData[11];
-          totalWeaponHp += +weaponData[10];
+        var realAtk = +weaponData[11] + 5 * this.state.weaponConfig[0].plus;
+        var realHp = +weaponData[10] + this.state.weaponConfig[0].plus;
+        totalWeaponAtk += realAtk;
+        totalWeaponHp += realHp;
         mainWeaponDOM = 
           <div className="cnt-weapon-main" data-slot="0">
             <div className="prt-main-bg">
@@ -204,19 +303,20 @@
               </div>
               <div className="btn-weapon">
                 <img className="img-weapon-main" src={"http://gbf.game-a.mbga.jp/assets/img/sp/assets/weapon/ls/"+this.state.weapons[0]+".jpg"} />
+                <div className="prt-quality">{this.state.weaponConfig[0].plus  ? '+' + this.state.weaponConfig[0].plus : ''}</div>
               </div>
             </div>
             <div className="prt-weapon-main-status">
               <div className="prt-hp">
                 <div className="ico-hp"></div>
-                <div className="txt-hp-value" title={weaponData[10]}>
-                  {weaponData[10]}
+                <div className="txt-hp-value" title={realHp}>
+                  {realHp}
                 </div>
               </div>
               <div className="prt-attack">
                 <div className="ico-atk"></div>
-                <div className="txt-atk-value" title={weaponData[11]}>
-                  {weaponData[11]}
+                <div className="txt-atk-value" title={realAtk}>
+                  {realAtk}
                 </div>
               </div>
             </div>
@@ -225,8 +325,10 @@
       var mainSummonDOM = '';
       if (this.state.summons[0]) {
         var summonData = this.getSummonState(this.state.summons[0]);
-        totalSummonHp += +summonData[10];
-        totalSummonAtk += +summonData[11];
+        var realAtk =  +summonData[11] + 5 * this.state.summonConfig[0].plus;
+        var realHp = +summonData[10] + this.state.summonConfig[0].plus;
+        totalSummonHp += realHp;
+        totalSummonAtk += realAtk;
         var attribute = 2;
         switch (summonData[2]) {
           case '火':
@@ -257,20 +359,20 @@
                     </div>
                     <div className="shining-1"></div>
                     <div className="shining-2"></div>
-                    
+                    <div className="prt-quality">{this.state.summonConfig[0].plus  ? '+' + this.state.summonConfig[0].plus : ''}</div>
                   </div>
                 </div>
                 <div className="prt-summon-main-status">
                   <div className="prt-hp">
                     <div className="ico-hp"></div>
-                    <div className="txt-hp-value" title={summonData[10]}>
-                      {summonData[10]}
+                    <div className="txt-hp-value" title={realHp}>
+                      {realHp}
                     </div>
                   </div>
                   <div className="prt-attack">
                     <div className="ico-atk"></div>
-                    <div className="txt-atk-value" title={summonData[11]}>
-                      {summonData[11]}
+                    <div className="txt-atk-value" title={realAtk}>
+                      {realAtk}
                     </div>
                   </div>
                 </div>
@@ -284,7 +386,7 @@
                                 <div className="icon_type_b_2"></div>
                               </div>
                               <div className="shining-1"></div>
-                              <div className="shining-2"></div>
+                              <div className="shining-2"></div>                
                               
                             </div>
                           </div>
@@ -307,8 +409,10 @@
           return '';
         } else if (summon) {
           var summonData = this.getSummonState(summon);
-          totalSummonHp += +summonData[10];
-          totalSummonAtk += +summonData[11];
+          var realHp = +summonData[10] + this.state.summonConfig[index].plus;
+          var realAtk = +summonData[11] + 5 * this.state.summonConfig[index].plus;
+          totalSummonHp += realHp;
+          totalSummonAtk += realAtk;
           return <div className="lis-summon-sub">
                   <div className="btn-summon rarity-3" data-slot={index}>
                     <img className="img-summon-sub" src={"http://gbf.game-a.mbga.jp/assets/img/sp/assets/summon/party_sub/"+summon+".jpg"} />
@@ -317,19 +421,19 @@
                     </div>
                     <div className="shining-1"></div>
                     <div className="shining-2"></div>
-                    
+                    <div className="prt-quality">{this.state.summonConfig[index].plus  ? '+' + this.state.summonConfig[index].plus : ''}</div>
                   </div>
                   <div className="prt-summon-sub-status">
                     <div className="prt-hp">
                       <div className="ico-hp"></div>
-                      <div className="txt-hp-value" title={summonData[10]}>
-                        {summonData[10]}
+                      <div className="txt-hp-value" title={realHp}>
+                        {realHp}
                       </div>
                     </div>
                     <div className="prt-attack">
                       <div className="ico-atk"></div>
-                      <div className="txt-atk-value" title={summonData[11]}>
-                        {summonData[11]}
+                      <div className="txt-atk-value" title={realAtk}>
+                        {realAtk}
                       </div>
                     </div>
                   </div>
@@ -360,19 +464,51 @@
         this.state.weapons.forEach(function(weapon, index) {
           if (weapon) {
             var weaponData = this.getWeaponState(weapon);
-            rows.push(<tr>
+            rows.push(<tr data-type="weapon" data-slot={index} key={"weapon-config-" + index}>
                       <td className="list-item"><img src={"http://gbf.game-a.mbga.jp/assets/img/sp/assets/weapon/m/"+weapon+".jpg"} />
                 </td>
                       <td>{index + 1}</td>
                       <td>{weaponData[1]}</td>
                       <td><select className="level">{from150}</select></td>
-                      <td><select className="plus">{from100}</select></td>
+                      <td><select className="plus" onChange={this.onPlusChange}>{from100}</select></td>
                       <td><select className="skillLevel">{from15}</select></td>
                    </tr>);
           } else {
           }
         }, this);
-        weaponConfigDOM = <table className="table table-condensed table-striped table-hover"><tbody>{rows}</tbody></table>
+        weaponConfigDOM = <table className="table table-condensed table-striped table-hover">
+                            <thead><tr><th></th><th>Slot</th><th>Name</th><th>level</th><th>Plus</th><th>Skill level</th><th>Over limit</th></tr></thead>
+                            <tbody>{rows}</tbody>
+                          </table>
+      }
+      var summonConfigDOM = '';
+      if (totalSummonAtk) {
+        var from150 = [], from15=[], from100 = [];
+        for (var i = 1; i <= 150; i++) {
+          from150.push(<option value={i}>{i}</option>);
+        }
+        for (var i = 0; i < 100; i++) {
+          from100.push(<option value={i}>{i}</option>);
+        }
+        var rows = [];
+        this.state.summons.forEach(function(summon, index) {
+          if (summon) {
+            var summonData = this.getSummonState(summon);
+            rows.push(<tr data-type="summon" data-slot={index} key={"summon-config-" + index}>
+                      <td className="list-item"><img src={"http://gbf.game-a.mbga.jp/assets/img/sp/assets/summon/party_sub/"+summon+".jpg"} />
+                </td>
+                      <td>{index + 1}</td>
+                      <td>{summonData[1]}</td>
+                      <td><select className="level">{from150}</select></td>
+                      <td><select className="plus" onChange={this.onPlusChange}>{from100}</select></td>
+                   </tr>);
+          } else {
+          }
+        }, this);
+        summonConfigDOM = <table className="table table-condensed table-striped table-hover">
+                            <thead><tr><th></th><th>Slot</th><th>Name</th><th>level</th><th>Plus</th><th>Over limit</th></tr></thead>
+                            <tbody>{rows}</tbody>
+                          </table>
       }
       return  <div className="cnt-index" onMouseOut={this.onMouseOut}  onMouseDown={this.onMouseDown}  onMouseUp={this.onMouseUp} onClick={this.onClick}>
                 <div className="cnt-weapon-list">
@@ -416,6 +552,7 @@
                   </div>
                 </div>
                 {weaponConfigDOM}
+                {summonConfigDOM}
                 <WeaponSelector weapons={window.SSR_WEAPON_RAW} />
                 <SummonSelector summons={window.SSR_SUMMON_RAW} />
               </div>
