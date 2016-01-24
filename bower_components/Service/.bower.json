@@ -1,0 +1,26 @@
+{
+  "name": "Service",
+  "description": "Cross module service/state register/request/query interface",
+  "private": "true",
+  "main": "service.js",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "gulpfile.js",
+    "karma.conf"
+  ],
+  "homepage": "https://github.com/alivedise/servicejs",
+  "_release": "69ab2905f0",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "69ab2905f06ba06cc86b680454f43e2b96b0f17c"
+  },
+  "_source": "https://github.com/alivedise/servicejs.git",
+  "_target": "*",
+  "_originalSource": "https://github.com/alivedise/servicejs.git",
+  "_direct": true
+}

@@ -1,0 +1,25 @@
+{
+  "name": "Service",
+  "version": "0.0.1",
+  "description": "Cross module service/state register/request/query interface",
+  "main": "service.js",
+  "directories": {
+    "test": "test"
+  },
+  "private": "true",
+  "devDependencies": {
+    "del": "^1.2.1",
+    "gulp": "^3.9.0",
+    "gulp-concat": "^2.6.0",
+    "gulp-eslint": "^1.0.0",
+    "karma": "^0.12.31",
+    "karma-chrome-launcher": "^0.1.4",
+    "karma-firefox-launcher": "^0.1.4",
+    "karma-mocha": "^0.1.10",
+    "karma-sinon-chai": "^0.3.0",
+    "run-sequence": "^1.1.2"
+  },
+  "scripts": {
+    "test": "gulp test"
+  }
+}

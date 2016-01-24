@@ -1,0 +1,18 @@
+.cnt-summon-list, .cnt-weapon-list {
+  display: inline-block;
+  float: left;
+}
+
+.cnt-index {
+  width: auto;
+  padding: 0;
+}
+
+.list-item img {
+  width: 50px;
+}
+
+.modal-body {
+  max-height: 300px;
+  overflow-y: scroll;
+}

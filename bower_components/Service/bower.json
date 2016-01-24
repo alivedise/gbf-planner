@@ -1,0 +1,16 @@
+{
+  "name": "Service",
+  "version": "0.0.1",
+  "description": "Cross module service/state register/request/query interface",
+  "private": "true",
+  "main": "service.js",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "gulpfile.js",
+    "karma.conf"
+  ]
+}
