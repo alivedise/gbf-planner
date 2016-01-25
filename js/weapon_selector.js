@@ -34,19 +34,19 @@
     },
     onSaveClick: function onSaveClick() {
       var activeNow = this.refs.table.getDOMNode().querySelector('tr.info');
-      if (activeNow) {
-        activeNow = activeNow.dataset.id;
-      } else {
-        activeNow = '';
+      if (!activeNow) {
+        this.resolve && this.resolve();
+        $(this.getDOMNode()).modal('hide');
+        return;
       }
-      this.resolve && this.resolve(activeNow);
+      this.resolve && this.resolve(activeNow.dataset.name, activeNow.dataset.limit);
       $(this.getDOMNode()).modal('hide');
     },
     render: function render() {
       var dom = this.props.weapons.map(function (weapon) {
         return React.createElement(
           'tr',
-          { className: 'list-item', 'data-id': weapon[0] },
+          { className: 'list-item', 'data-id': weapon[0], 'data-name': weapon[1], 'data-limit': weapon[14] === '' ? 0 : 4 },
           React.createElement(
             'td',
             null,

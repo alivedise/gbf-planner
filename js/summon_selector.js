@@ -34,19 +34,20 @@
     },
     onSaveClick: function onSaveClick() {
       var activeNow = this.refs.table.getDOMNode().querySelector('tr.info');
-      if (activeNow) {
-        activeNow = activeNow.dataset.id;
-      } else {
-        activeNow = '';
+      if (!activeNow) {
+        this.resolve && this.resolve();
+        $(this.getDOMNode()).modal('hide');
+        return;
       }
-      this.resolve && this.resolve(activeNow);
+
+      this.resolve && this.resolve(activeNow.dataset.name, activeNow.dataset.limit);
       $(this.getDOMNode()).modal('hide');
     },
     render: function render() {
       var dom = this.props.summons.map(function (summon) {
         return React.createElement(
           'tr',
-          { className: 'list-item', 'data-id': summon[0] },
+          { className: 'list-item', 'data-id': summon[0], 'data-name': summon[1], 'data-limit': 0 },
           React.createElement(
             'td',
             null,
