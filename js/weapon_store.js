@@ -122,7 +122,9 @@
         switch (skillName) {
           case 'アンノウン・ATK II':
           case '烈光の至恩':
+          case 'セービングアタック':
           case '自動辻斬装置':
+          case 'ストレングス':
             total[+data.attribute - 1].unknown += (5 + skillLevel);
             break;
           case 'アンノウン・ATK':
