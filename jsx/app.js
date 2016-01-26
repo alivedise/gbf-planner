@@ -905,7 +905,7 @@
       var characterConfigDOM = 
         <form className="form-inline">
           <div className="form-group">
-            <button onClick={this.saveConfigToHash} className="btn btn-info" id="friend">Generate link/產生連結</button><input className="form-control"  ref="link" readonly="true" value={window.location.href} />
+            <button onClick={this.saveConfigToHash} className="btn btn-info" id="friend">Generate link/產生連結</button><input className="form-control link"  ref="link" readonly="true" value={window.location.href} />
           </div>
         </form>
 

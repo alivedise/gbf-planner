@@ -1421,7 +1421,7 @@
             { onClick: this.saveConfigToHash, className: 'btn btn-info', id: 'friend' },
             'Generate link/產生連結'
           ),
-          React.createElement('input', { className: 'form-control', ref: 'link', readonly: 'true', value: window.location.href })
+          React.createElement('input', { className: 'form-control link', ref: 'link', readonly: 'true', value: window.location.href })
         )
       );
 
