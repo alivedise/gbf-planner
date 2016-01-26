@@ -1473,7 +1473,7 @@
                     React.createElement(
                       'span',
                       { className: 'label label-warning label-sm' },
-                      'v0.0.1BETA RC5'
+                      'v0.0.1BETA RC6'
                     )
                   )
                 ),
@@ -1584,7 +1584,7 @@
           weaponConfigDOM,
           summonConfigDOM
         ),
-        React.createElement(WeaponSelector, { weapons: window.SSR_WEAPON_RAW }),
+        React.createElement(WeaponSelector, { ref: 'weapon', weapons: window.SSR_WEAPON_RAW }),
         React.createElement(SummonSelector, { summons: window.SSR_SUMMON_LIMIT_BREAK })
       );
     }
