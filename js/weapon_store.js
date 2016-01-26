@@ -3,8 +3,8 @@
 (function(exports) {
   exports.WeaponStore = {
     start: function() {
-      this.nameMap = new Map();
       this.idMap = new Map();
+      this.idLevelMap = new Map();
       window.SSR_WEAPON_RAW.forEach(function(weapon) {
         var weaponData = {
           id: weapon[0],
@@ -19,18 +19,19 @@
           skill2: weapon[7],
           rarity: 'ssr',
           finalLiberation: weapon[14] !== '',
-          max_level: (weapon[14] !== '') ? 150 : 100
+          max_level: (weapon[14] !== '') ? 150 : 100,
+          limit: (weapon[14] !== '') ? 4 : 0
         };
-        this.nameMap.set(weapon[1], weaponData);
         if (!weapon[14]) {
           this.idMap.set(weapon[0], weaponData)
         }
+        this.idLevelMap.set(weapon[0] + ':' + weaponData.limit, weaponData);
       }, this);
       this.parseFinalRevolution();
     },
     parseFinalRevolution: function() {
-      this.nameMap.forEach(function(data) {
-        if (data.finalLiberation) {
+      this.idLevelMap.forEach(function(data) {
+        if (data.limit === 4) {
           var baseWeapon = this.idMap.get(data.id);
           data.lv100_atk = baseWeapon.max_atk;
           data.lv100_hp = baseWeapon.max_hp;
@@ -61,7 +62,7 @@
     },
 
     calculateAttackBladeAmount: function(config) {
-      var data = this.nameMap.get(config.name);
+      var data = this.getData(config);
       var skills = [data.skill1];
       if  (data.skill2) {
         skills.push(data.skill2);
@@ -73,42 +74,48 @@
           unknown: 0,
           magna: 0,
           magnals: 0,
-          normalls: 0
+          normalls: 0,
+          baha: 0
         },
         {
           normal: 0,
           unknown: 0,
           magna: 0,
           magnals: 0,
-          normalls: 0
+          normalls: 0,
+          baha: 0
         },
         {
           normal: 0,
           unknown: 0,
           magna: 0,
           magnals: 0,
-          normalls: 0
+          normalls: 0,
+          baha: 0
         },
         {
           normal: 0,
           unknown: 0,
           magna: 0,
           magnals: 0,
-          normalls: 0
+          normalls: 0,
+          baha: 0
         },
         {
           normal: 0,
           unknown: 0,
           magna: 0,
           magnals: 0,
-          normalls: 0
+          normalls: 0,
+          baha: 0
         },
         {
           normal: 0,
           unknown: 0,
           magna: 0,
           magnals: 0,
-          normalls: 0
+          normalls: 0,
+          baha: 0
         }
       ];
       skills.forEach(function(skillName) {
@@ -177,14 +184,14 @@
           case '闇の攻刃':
             total[5].normal += (0 + skillLevel);
             break;
-          case '黑霧方陣・攻刃':
+          case '黒霧方陣・攻刃':
             if (skillLevel <= 10) {
               total[5].magna += (2 + skillLevel);
             } else {
               total[5].magna += (12 + 0.5 * (skillLevel - 10));
             }
             break;
-          case '黑霧方陣・攻刃II':
+          case '黒霧方陣・攻刃II':
             if (skillLevel <= 10) {
               total[5].magna += (5 + skillLevel);
             } else {
@@ -335,7 +342,7 @@
               if (skillLevel === 10) {
                 skillLevel = 11;
               }
-              a.normal += (19 + skillLevel);
+              a.baha += (19 + skillLevel);
             });
             break;
           case 'コンキリオ・ルーベル':
@@ -343,16 +350,19 @@
               if (skillLevel === 10) {
                 skillLevel = 11;
               }
-              a.normal += (9.5 + 0.5 * skillLevel);
+              a.baha += (9.5 + 0.5 * skillLevel);
             });
             break;
         }
       }, this);
       return total;
     },
+    getData: function(config) {
+      return this.idLevelMap.get(config.id + ':' + config.limit);
+    },
     calculateRealData: function(config) {
-      var data = this.nameMap.get(config.name);
-      var isFinalEvo = data.finalLiberation;
+      var data = this.getData(config);
+      var isFinalEvo = (data.limit === 4);
       if (isFinalEvo) {
         var diffAtk = Math.ceil((data.lv100_atk - data.min_atk) / 100);
         var diffHp = Math.ceil((data.lv100_hp - data.min_hp) / 100);

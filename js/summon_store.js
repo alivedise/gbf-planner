@@ -3,8 +3,9 @@
 (function(exports) {
   exports.SummonStore = {
     start: function() {
-      this.nameMap = new Map();
-      window.SSR_SUMMON_RAW.forEach(function(summon) {
+      this.idLimitMap = new Map();
+      window.SSR_SUMMON_LIMIT_BREAK.forEach(function(summon) {
+        var limit = +summon[13] || 0;
         var summonData = {
           id: summon[0],
           name: summon[1],
@@ -15,10 +16,17 @@
           attribute: this.getElementAttribute(summon[2]),
           type: summon[3],
           rarity: 'ssr',
-          max_level: 100
+          max_level: 100,
+          skill: summon[7],
+          limit: limit
         };
-        this.nameMap.set(summon[1], summonData);
+        var key = summon[0] + ':' + limit;
+        this.idLimitMap.set(key, summonData);
       }, this);
+    },
+
+    getData: function(config) {
+      return this.idLimitMap.get(config.id + ':' + config.limit);
     },
 
     getElementAttribute: function(name) {
@@ -44,169 +52,474 @@
       }
     },
 
-    calculateAttackBladeAmount: function(config) {
-      var data = this.nameMap.get(config.name);
-      var skills = [data.skill1];
-      if  (data.skill2) {
-        skills.push(data.skill2);
-      }
-      var skillLevel = config.skillLevel;
+    calculateSummonBonus: function(config) {
+      var data = this.getData(config);
       var total = [
         {
-          normal: 0,
+          attribute: 0,
+          character: 0,
+          magna: 0,
           unknown: 0,
-          magna: 0
+          normal: 0
         },
         {
-          normal: 0,
+          attribute: 0,
+          character: 0,
+          magna: 0,
           unknown: 0,
-          magna: 0
+          normal: 0
         },
         {
-          normal: 0,
+          attribute: 0,
+          character: 0,
+          magna: 0,
           unknown: 0,
-          magna: 0
+          normal: 0
         },
         {
-          normal: 0,
+          attribute: 0,
+          character: 0,
+          magna: 0,
           unknown: 0,
-          magna: 0
+          normal: 0
         },
         {
-          normal: 0,
+          attribute: 0,
+          character: 0,
+          magna: 0,
           unknown: 0,
-          magna: 0
+          normal: 0
         },
         {
-          normal: 0,
+          attribute: 0,
+          character: 0,
+          magna: 0,
           unknown: 0,
-          magna: 0
+          normal: 0
         }
       ];
-      skills.forEach(function(skillName) {
-        switch (skillName) {
-          case 'アンノウン・ATK II':
-          case '烈光の至恩':
-          case '自動辻斬装置':
-            total[+data.attribute - 1].unknown += (5 + skillLevel);
-            break;
-          case 'アンノウン・ATK':
-          case 'アンノウン・ATK ':
-            total[+data.attribute - 1].unknown += (2 + skillLevel);
-            break;
-          case '地裂の攻刃':
-            total[2].normal += (5 + skillLevel);
-            break;
-          case '大地の攻刃':
-            total[2].normal += (2 + skillLevel);
-            break;
-          case '土の攻刃':
-            total[2].normal += (0 + skillLevel);
-            break;
-          case '創樹方陣・攻刃':
-            total[2].magna += (2 + skillLevel);
-            break;
-          case '創樹方陣・攻刃II':
-            total[2].magna += (5 + skillLevel);
-            break;
-          case '奈落の攻刃':
-            total[5].normal += (5 + skillLevel);
-            break;
-          case '憎悪の攻刃':
-            total[5].normal += (2 + skillLevel);
-            break;
-          case '闇の攻刃':
-            total[5].normal += (0 + skillLevel);
-            break;
-          case '黑霧方陣・攻刃':
-            total[5].magna += (2 + skillLevel);
-            break;
-          case '黑霧方陣・攻刃II':
-            total[5].magna += (5 + skillLevel);
-            break;
-          case '天光の攻刃':
-            total[4].normal += (5 + skillLevel);
-            break;
-          case '雷電の攻刃':
-            total[4].normal += (2 + skillLevel);
-            break;
-          case '光の攻刃':
-            total[4].normal += (0 + skillLevel);
-            break;
-          case '騎解方陣・攻刃':
-            total[4].normal += (2 + skillLevel);
-            break;
-          case '騎解方陣・攻刃II':
-            total[4].normal += (5 + skillLevel);
-            break;
-          case '紅蓮の攻刃':
-          case '紅蓮の攻刃II':
-            total[0].normal += (5 + skillLevel);
-            break;
-          case '業火の攻刃':
-            total[0].normal += (2 + skillLevel);
-            break;
-          case '火の攻刃':
-            total[0].normal += (0 + skillLevel);
-            break;
-          case '機炎方陣・攻刃':
-            total[0].magna += (2 + skillLevel);
-            break;
-          case '機炎方陣・攻刃II':
-            total[0].magna += (5 + skillLevel);
-            break;
-          case '霧氷の攻刃':
-            total[1].normal += (5 + skillLevel);
-            break;
-          case '渦潮の攻刃':
-            total[1].normal += (2 + skillLevel);
-            break;
-          case '水の攻刃':
-            total[1].normal += (0 + skillLevel);
-            break;
-          case '海神方陣・攻刃':
-            total[1].magna += (2 + skillLevel);
-            break;
-          case '海神方陣・攻刃II':
-            total[1].magna += (5 + skillLevel);
-            break;
-          case '雷電の攻刃':
-            total[3].normal += (5 + skillLevel);
-            break;
-          case '乱気の攻刃':
-            total[3].normal += (2 + skillLevel);
-            break;
-          case '竜巻の攻刃':
-            total[3].normal += (0 + skillLevel);
-            break;
-          case '嵐竜方陣・攻刃':
-            total[3].magna += (2 + skillLevel);
-            break;
-          case '嵐竜方陣・攻刃II':
-            total[3].magna += (5 + skillLevel);
-            break;
-          case 'ヒューマンアニムス・ウィス':
-            total.forEach(function(a) {
-              if (skillLevel === 10) {
-                skillLevel = 11;
-              }
-              a.normal += (19 + skillLevel);
-            });
-            break;
-          case 'コンキリオ・ルーベル':
-            total.forEach(function(a) {
-              if (skillLevel === 10) {
-                skillLevel = 11;
-              }
-              a.normal += (9.5 + 0.5 * skillLevel);
-            });
-            break;
+      if (data.name.indexOf('Dark angel Ollivier') >= 0 ) {
+        if (config.limit === 4) {
+          total[5].character += 60;
+        } else if (config.limit === 3) {
+          total[5].character += 40;
+        } else {
+          total[5].character += 25;
         }
-      }, this);
+      } else if (data.name.indexOf('Ranko Kanzaki') >= 0) {
+        if (config.limit === 3) {
+          total.forEach(function(one) {
+            one.unknown += 50;
+          });
+        } else {
+          total.forEach(function(one) {
+            one.unknown += 30;
+          });
+        }
+      } else if (data.name.indexOf('Agnis') >= 0) {
+        if (config.limit === 3) {
+          total[0].normal += 120;
+        } else {
+          total[0].normal += 80;
+        }
+      } else if (data.name.indexOf('Athena') >= 0) {
+        if (config.limit === 3) {
+          total[0].attribute += 80;
+        } else {
+          total[0].attribute += 50;
+        }
+      } else if (data.name.indexOf('Anat') >= 0) {
+        if (config.limit === 3) {
+          total[3].attribute += 80;
+        } else {
+          total[3].attribute += 50;
+        }
+      } else if (data.name.indexOf('Apollo') >= 0) {
+        if (config.limit >= 3) {
+          total[4].attribute += 80;
+        } else {
+          total[4].attribute += 50;
+        }
+      } else if (data.name.indexOf('Albacore') >= 0) {
+        if (config.limit >= 3) {
+          total[3].character += 25;
+        } else {
+          total[3].character += 20;
+        }
+      } else if (data.name.indexOf('Avaritia') >= 0) {
+        if (config.limit >= 3) {
+          total[2].character += 40;
+        } else {
+          total[2].character += 30;
+        }
+      } else if (data.name.indexOf('Ifrit') >= 0) {
+        if (config.limit === 4) {
+          total[0].attribute += 60;
+        } else if (config.limit === 3) {
+          total[0].attribute += 50;
+        } else {
+          total[0].attribute += 40;
+        }
+      } else if (data.name.indexOf('Vohu Manah') >= 0) {
+        if (config.limit === 3) {
+          total[2].attribute += 50;
+        } else {
+          total[2].attribute += 40;
+        }
+      } else if (data.name.indexOf('Oxymoron') >= 0) {
+        if (config.limit === 3) {
+          total[0].attribute += 40;
+          total[1].attribute += 40;
+        } else {
+          total[0].attribute += 25;
+          total[1].attribute += 25;
+        }
+      } else if (data.name.indexOf('Oceanus') >= 0) {
+        if (config.limit === 3) {
+          total[1].attribute += 60;
+          total[4].attribute += 60;
+        } else {
+          total[1].attribute += 40;
+          total[4].attribute += 40;
+        }
+      } else if (data.name.indexOf('オダヅモッキー・ギャングスタ') >= 0) {
+        total[1].attribute += 50;
+      } else if (data.name.indexOf('Autumn･Myconid') >= 0) {
+        total[2].attribute += 50;
+      } else if (data.name.indexOf('Odin') >= 0) {
+        if (config.limit >= 3) {
+          total[4].attribute += 75;
+          total[5].attribute += 75;
+        } else {
+          total[4].attribute += 50;
+          total[5].attribute += 50;
+        }
+      } else if (data.name.indexOf('Garuda') >= 0) {
+        if (config.limit >= 3) {
+          total[3].character += 40;
+        } else {
+          total[3].character += 25;
+        }
+      } else if (data.name.indexOf('Cybele') >= 0) {
+        if (config.limit >= 3) {
+          total[2].character += 40;
+        } else {
+          total[2].character += 30;
+        }
+      } else if (data.name.indexOf('Quetzalcoatl') >= 0) {
+        if (config.limit >= 3) {
+          total[2].attribute += 60;
+          total[3].attribute += 60;
+        } else {
+          total[2].attribute += 40;
+          total[3].attribute += 40;
+        }
+      } else if (data.name.indexOf('Cerberus') >= 0) {
+        if (config.limit >= 3) {
+          total[0].attribute += 40;
+          total[5].attribute += 40;
+        } else {
+          total[0].attribute += 25;
+          total[5].attribute += 25;
+        }
+      } else if (data.name.indexOf('Cocytus') >= 0) {
+        if (config.limit >= 3) {
+          total[1].attribute += 50;
+        } else {
+          total[1].attribute += 40;
+        }
+      } else if (data.name.indexOf('Colow') >= 0) {
+        if (config.limit === 4) {
+          total[4].character += 50;
+        } else if (config.limit === 3) {
+          total[4].character += 40;
+        } else {
+          total[4].character += 30;
+        }
+      } else if (data.name.indexOf('Colossus Magna') >= 0) {
+        if (config.limit >= 3) {
+          total[0].magna += 100;
+        } else {
+          total[0].magna += 50;
+        }
+      } else if (data.name.indexOf('Sagittarius') >= 0) {
+        if (config.limit === 4) {
+          total[3].attribute += 60;
+        } else if (config.limit === 3) {
+          total[3].attribute += 50;
+        } else {
+          total[3].attribute += 40;
+        }
+      } else if (data.name.indexOf('Satan') >= 0) {
+        if (config.limit >= 3) {
+          total[2].attribute += 60;
+          total[5].attribute += 60;
+        } else {
+          total[2].attribute += 40;
+          total[5].attribute += 40;
+        }
+      } else if (data.name.indexOf('Satyr') >= 0) {
+        if (config.limit >= 3) {
+          total[0].character += 40;
+        } else {
+          total[0].character += 30;
+        }
+      } else if (data.name.indexOf('Chevalier Magna') >= 0) {
+        if (config.limit >= 3) {
+          total[4].magna += 100;
+        } else {
+          total[4].magna += 50;
+        }
+      } else if (data.name.indexOf('Sylph') >= 0) {
+        if (config.limit >= 3) {
+          total[0].character += 25;
+        } else {
+          total[0].character += 20;
+        }
+      } else if (data.name.indexOf('Jack') >= 0) {
+        if (config.limit === 3) {
+          total[5].attribute += 20;
+        } else {
+          total[5].attribute += 10;
+        }
+      } else if (data.name.indexOf('THE Order grande') >= 0) {
+        if (config.limit >= 3) {
+          total.forEach(function(one) {
+            one.character += 200;
+          });
+        } else {
+          total.forEach(function(one) {
+            one.character += 100;
+          });
+        }
+      } else if (data.name.indexOf('Siren') >= 0) {
+        if (config.limit === 3) {
+          total[3].attribute += 60;
+          total[4].attribute += 60;
+        } else {
+          total[3].attribute += 40;
+          total[4].attribute += 40;
+        }
+      } else if (data.name.indexOf('Celeste Magna') >= 0) {
+        if (config.limit === 3) {
+          total[5].magna += 100;
+        } else {
+          total[5].magna += 50;
+        }
+      } else if (data.name.indexOf('Zeus') >= 0) {
+        if (config.limit === 3) {
+          total[4].normal += 120;
+        } else {
+          total[4].normal += 80;
+        }
+      } else if (data.name.indexOf('Zephyros') >= 0) {
+        if (config.limit === 3) {
+          total[3].normal += 120;
+        } else {
+          total[3].normal += 80;
+        }
+      } else if (data.name.indexOf('Tiamat Magna') >= 0) {
+        if (config.limit === 3) {
+          total[3].magna += 100;
+        } else {
+          total[3].magna += 50;
+        }
+      } else if (data.name.indexOf('Titan') >= 0) {
+        if (config.limit === 3) {
+          total[2].normal += 120;
+        } else {
+          total[2].normal += 80;
+        }
+      } else if (data.name.indexOf('Deirdre') >= 0) {
+        total[3].attribute += 50;
+      } else if (data.name.indexOf('Diabolos') >= 0) {
+        if (config.limit === 3) {
+          total[5].attribute += 40;
+        } else {
+          total[5].attribute += 30;
+        }
+      } else if (data.name.indexOf('Na-zha') >= 0) {
+        if (config.limit === 4) {
+          total[0].attribute += 70;
+          total[3].attribute += 70;
+        } else if (config.limit === 3) {
+          total[0].attribute += 60;
+          total[3].attribute += 60;
+        } else {
+          total[0].attribute += 40;
+          total[3].attribute += 40;
+        }
+      } else if (data.name.indexOf('Nephthys') >= 0) {
+        if (config.limit === 3) {
+          total[3].attribute += 50;
+        } else {
+          total[3].attribute += 40;
+        }
+      } else if (data.name.indexOf('Neptune') >= 0) {
+        if (config.limit === 3) {
+          total[1].character += 40;
+        } else {
+          total[1].character += 30;
+        }
+      } else if (data.name.indexOf('Hades') >= 0) {
+        if (config.limit === 3) {
+          total[5].normal += 120;
+        } else {
+          total[5].normal += 80;
+        }
+      } else if (data.name.indexOf('Baal') >= 0) {
+        if (config.limit === 3) {
+          total[2].attribute += 60;
+          total[4].attribute += 60;
+        } else {
+          total[2].attribute += 40;
+          total[4].attribute += 40;
+        }
+      } else if (data.name.indexOf('Bahamut') >= 0) {
+        if (config.limit === 3) {
+          total[5].attribute += 120;
+        } else {
+          total[5].attribute += 100;
+        }
+      } else if (data.name.indexOf('Fafnir') >= 0) {
+        total[0].attribute += 50;
+      } else if (data.name.indexOf('Phoenix') >= 0) {
+        if (config.limit === 3) {
+          total[0].attribute += 50;
+        } else {
+          total[0].attribute += 40;
+        }
+      } else if (data.name.indexOf('Fenrir') >= 0) {
+        if (config.limit === 4) {
+          total[1].attribute += 40;
+        } else if (config.limit === 3) {
+          total[1].attribute += 25;
+        } else {
+          total[1].attribute += 20;
+        }
+      } else if (data.name.indexOf('Hecatoncheir') >= 0) {
+        if (config.limit >= 3) {
+          total[4].character += 25;
+        } else {
+          total[4].character += 20;
+        }
+      } else if (data.name.indexOf('Poseidon') >= 0) {
+        if (config.limit >= 3) {
+          total[1].character += 25;
+        } else {
+          total[1].character += 20;
+        }
+      } else if (data.name.indexOf('Makyura Marius') >= 0) {
+        if (config.limit >= 3) {
+          total[1].attribute += 80;
+        } else {
+          total[1].attribute += 50;
+        }
+      } else if (data.name.indexOf('Magi') >= 0) {
+        if (config.limit >= 3) {
+          total[4].character += 30;
+        } else {
+          total[4].character += 25;
+        }
+      } else if (data.name.indexOf('Manawydan') >= 0) {
+        if (config.limit >= 3) {
+          total[1].character += 25;
+        } else {
+          total[1].character += 20;
+        }
+      } else if (data.name.indexOf('Mamonas') >= 0) {
+        if (config.limit >= 3) {
+          total[3].character += 25;
+        } else {
+          total[3].character += 20;
+        }
+      } else if (data.name.indexOf('Marduk') >= 0) {
+        if (config.limit >= 3) {
+          total[2].character += 25;
+        } else {
+          total[2].character += 20;
+        }
+      } else if (data.name.indexOf('Mithra') >= 0) {
+        if (config.limit >= 3) {
+          total[3].character += 25;
+        } else {
+          total[3].character += 20;
+        }
+      } else if (data.name.indexOf('Midgardsorm') >= 0) {
+        if (config.limit >= 3) {
+          total[2].character += 25;
+        } else {
+          total[2].character += 20;
+        }
+      } else if (data.name.indexOf('Medusa') >= 0) {
+        if (config.limit >= 3) {
+          total[2].attribute += 80;
+        } else {
+          total[2].attribute += 50;
+        }
+      } else if (data.name.indexOf('Yggdrasil Magna') >= 0) {
+        if (config.limit >= 3) {
+          total[2].magna += 100;
+        } else {
+          total[2].magna += 50;
+        }
+      } else if (data.name.indexOf('Lich') >= 0) {
+        if (config.limit >= 3) {
+          total[1].attribute += 60;
+          total[5].attribute += 60;
+        } else {
+          total[1].attribute += 40;
+          total[5].attribute += 40;
+        }
+      } else if (data.name.indexOf('Leviathan Magna') >= 0) {
+        if (config.limit >= 3) {
+          total[1].magna += 100;
+        } else {
+          total[1].magna += 50;
+        }
+      } else if (data.name.indexOf('Lucifer') >= 0) {
+        if (config.limit >= 3) {
+          total[4].attribute += 120;
+        } else {
+          total[4].attribute += 100;
+        }
+      } else if (data.name.indexOf('Robomi') >= 0) {
+        if (config.limit >= 3) {
+          total[4].attribute += 50;
+        } else {
+          total[4].attribute += 40;
+        }
+      } else if (data.name.indexOf('Ebisu') >= 0) {
+        total[1].attribute += 50;
+      } else if (data.name.indexOf('Varuna') >= 0) {
+        if (config.limit === 3) {
+          total[1].normal += 120;
+        } else {
+          total[1].normal += 80;
+        }
+      } else if (data.name.indexOf('Veselago') >= 0) {
+        total[4].attribute += 40;
+      } else if (data.name.indexOf('Dragon of Thunderbolt') >= 0) {
+        if (config.limit >= 3) {
+          total[0].attribute += 60;
+          total[4].attribute += 60;
+        } else {
+          total[0].attribute += 40;
+          total[4].attribute += 40;
+        }
+      } else if (data.name.indexOf('Fujin & Raijin') >= 0) {
+        if (config.limit >= 3) {
+          total[3].attribute += 40;
+          total[4].attribute += 40;
+        } else {
+          total[3].attribute += 25;
+          total[4].attribute += 25;
+        }
+      }
       return total;
     },
     calculateRealData: function(config) {
-      var data = this.nameMap.get(config.name);
+      var data = this.getData(config);
       var isFinalEvo = data.finalLiberation;
       if (isFinalEvo) {
         var diffAtk = Math.ceil((data.lv100_atk - data.min_atk) / 100);

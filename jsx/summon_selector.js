@@ -38,14 +38,26 @@
         return;
       }
 
-      this.resolve && this.resolve(activeNow.dataset.name, activeNow.dataset.limit);
+      this.resolve && this.resolve(activeNow.dataset.id + ':' + activeNow.dataset.limit);
       $(this.getDOMNode()).modal('hide');
     },
     render: function() {
       var dom = this.props.summons.map(function(summon) {
-        return <tr className="list-item" data-id={summon[0]} data-name={summon[1]} data-limit={0}>
+        var starDOM = '';
+        if (+summon[13] === 4) {
+            starDOM = <div className="prt-evolution-star-s">
+                        <div className="prt-star-on"></div><div className="prt-star-on"></div><div className="prt-star-on"></div><div className="prt-ultimate-star-on"></div>
+                      </div>;
+        } else if (+summon[13] === 3) {
+            starDOM = <div className="prt-evolution-star-s">
+                        <div className="prt-star-on"></div><div className="prt-star-on"></div><div className="prt-star-on"></div>
+                      </div>;
+        }
+        return <tr className="list-item" data-id={summon[0]} data-name={summon[1]} data-limit={+summon[13]}>
                 <td><img src={"http://gbf.game-a.mbga.jp/assets/img/sp/assets/summon/party_sub/"+summon[0]+".jpg"} /></td>
                 <td>{summon[1]}</td>
+                <td>{summon[7]}</td>
+                <td>{starDOM}</td>
               </tr>
       });
       return <div className="modal fade" tabindex="-1" role="dialog">

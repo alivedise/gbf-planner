@@ -8,6 +8,57 @@
   padding: 0;
 }
 
+.cnt-weapon-main .prt-evolution-star-s {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  z-index: 10;
+}
+
+.prt-deck-select .lis-deck .prt-supporter {
+  background-size: 720px 1173px;
+  width: 720px;
+}
+
+.prt-deck-select .lis-deck .prt-supporter .prt-supporter-info .prt-supporter-detail {
+  width: auto;
+}
+
+.lis-deck {
+  width: 640px;
+}
+
+.cnt-weapon-sub .prt-evolution-star-s {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  z-index: 10;
+}
+
+.prt-deck-select {
+  width: auto;
+  height: auto;
+  background: transparent;
+}
+
+
+.cnt-summon-main .prt-evolution-star-s {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  z-index: 10;
+}
+
+
+.cnt-summon-sub .prt-evolution-star-s {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  z-index: 10;
+}
+
+
+
 .list-item img {
   width: 50px;
 }

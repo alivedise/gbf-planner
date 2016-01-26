@@ -8,18 +8,14 @@
       var baseWeaponConfig = {
         id: 0,
         plus: 0,
-        name: '',
         level: 100,
         skillLevel: 10,
-        finalLiberation: false,
         limit: 0
       };
       var baseSummonConfig = {
         id: 0,
-        name: '',
         plus: 0,
         level: 100,
-        finalLiberation: false,
         limit: 0
       };
       return {
@@ -49,28 +45,6 @@
         } else {
           var summonConfig = previuosState.summonConfig;
           summonConfig[+slot].plus = value;
-          return {
-            summonConfig: summonConfig
-          };
-        }
-      });
-    },
-    onLimitChange: function onLimitChange(evt) {
-      var tr = $(evt.target).closest('tr')[0];
-      var type = tr.dataset.type;
-      var slot = tr.dataset.slot;
-      var value = +$(evt.target).find(':selected').text();
-      console.log(slot, value);
-      this.setState(function (previuosState) {
-        if (type === 'weapon') {
-          var weaponConfig = previuosState.weaponConfig;
-          weaponConfig[+slot].limit = value;
-          return {
-            weaponConfig: weaponConfig
-          };
-        } else {
-          var summonConfig = previuosState.summonConfig;
-          summonConfig[+slot].limit = value;
           return {
             summonConfig: summonConfig
           };
@@ -124,45 +98,89 @@
     },
     parseHash: function parseHash() {
       var config = window.location.hash;
+      var strings = config.split(';');
+      if (strings.length < 17) {
+        console.error('invalid hash');
+        return;
+      }
+      var pcString = strings[0].split(',');
+      var frString = strings[1].split(',');
+      var weaponString = [strings[2].split(','), strings[3].split(','), strings[4].split(','), strings[5].split(','), strings[6].split(','), strings[7].split(','), strings[8].split(','), strings[9].split(','), strings[10].split(','), strings[11].split(',')];
+      var summonString = [strings[12].split(','), strings[13].split(','), strings[14].split(','), strings[15].split(','), strings[16].split(',')];
+      this.setState({
+        characterConfig: {
+          rank: pcString[0] || 1,
+          friend: {
+            id: frString[0].length === 10 ? frString[0] : '',
+            limit: +frString[1] || 0,
+            level: +frString[2] || 0,
+            plus: +frString[3] || 0
+          }
+        },
+        weaponConfig: weaponString.map(function (weapon) {
+          return {
+            id: weapon[0].length === 10 ? weapon[0] : '',
+            limit: +weapon[1] || 0,
+            level: +weapon[2] || 100,
+            skillLevel: +weapon[3] || 0,
+            plus: +weapon[4] || 0
+          };
+        }),
+        summonConfig: summonString.map(function (summon) {
+          return {
+            id: summon[0].length === 10 ? summon[0] : '',
+            limit: +summon[1] || 0,
+            level: +summon[2] || 100,
+            plus: +summon[3] || 0
+          };
+        })
+      });
     },
     onClick: function onClick(evt) {
       // console.log(evt.type, evt.target);
       if (evt.target.className.indexOf('weapon') >= 0) {
         var slot = +$(evt.target).closest('[data-slot]')[0].dataset.slot;
         console.log(slot);
-        Service.request('WeaponSelector:open').then((function (name, limit) {
-          if (!name) {
+        Service.request('WeaponSelector:open').then((function (result) {
+          if (!result) {
             return;
           }
+          var a = result.split(':');
+          var id = a[0];
+          var limit = a[1];
+          console.log(id, limit);
           this.setState(function (currentState) {
             var weaponConfig = currentState.weaponConfig[slot];
-            weaponConfig.name = name;
-            var data = WeaponStore.nameMap.get(name);
-            weaponConfig.id = data.id;
-            weaponConfig.limit = limit;
+            weaponConfig.id = id;
+            weaponConfig.limit = +limit;
             return {
               weaponConfig: currentState.weaponConfig
             };
           });
-        }).bind(this))['catch'](function () {});
+        }).bind(this))['catch'](function (err) {
+          console.log(err);
+        });
       } else if (evt.target.className.indexOf('summon') >= 0) {
         var slot = +$(evt.target).closest('[data-slot]')[0].dataset.slot;
-        Service.request('SummonSelector:open').then((function (name, limit) {
-          console.log(name);
-          if (!name) {
+        Service.request('SummonSelector:open').then((function (result) {
+          if (!result) {
             return;
           }
+          var a = result.split(':');
+          var id = a[0];
+          var limit = a[1];
+          console.log(id, limit);
           this.setState(function (currentState) {
             var summonConfig = currentState.summonConfig[slot];
-            summonConfig.name = name;
-            var data = SummonStore.nameMap.get(name);
-            summonConfig.limit = limit;
-            summonConfig.id = data.id;
+            summonConfig.id = id;
+            summonConfig.limit = +limit;
             return {
               summonConfig: currentState.summonConfig
             };
           });
-        }).bind(this))['catch'](function () {});
+        }).bind(this))['catch'](function (err) {
+          console.log(err);
+        });
       }
     },
     onMouseOut: function onMouseOut(evt) {
@@ -192,43 +210,138 @@
         a.magna += add[index].magna;
         a.normal += add[index].normal;
         a.unknown += add[index].unknown;
+        a.baha += add[index].baha;
       });
+    },
+    addBonus: function addBonus(total, add) {
+      total.forEach(function (a, index) {
+        a.magna += add[index].magna;
+        a.normal += add[index].normal;
+        a.unknown += add[index].unknown;
+        a.attribute += add[index].attribute;
+        a.character += add[index].character;
+      });
+    },
+    onRankChange: function onRankChange(evt) {
+      var value = isNaN(evt.target.value) ? 1 : evt.target.value;
+
+      this.setState(function (currentState) {
+        var characterConfig = currentState.characterConfig;
+        characterConfig.rank = value;
+        return {
+          characterConfig: characterConfig
+        };
+      });
+    },
+    saveConfigToHash: function saveConfigToHash() {
+      var charString = this.state.characterConfig.rank + ';';
+      var friendString = this.state.characterConfig.friend.id + ',' + this.state.characterConfig.friend.limit + ',' + this.state.characterConfig.friend.level + ',' + this.state.characterConfig.friend.plus + ';';
+      var weaponString = this.state.weaponConfig.map(function (weapon) {
+        return weapon.id + ',' + weapon.limit + ',' + weapon.level + ',' + weapon.skillLevel + ',' + weapon.plus + ';';
+      });
+      var summonString = this.state.summonConfig.map(function (summon) {
+        return summon.id + ',' + summon.limit + ',' + summon.level + ',' + summon.plus + ';';
+      });
+      window.location.hash = charString + friendString + weaponString + summonString;
+    },
+    chooseFriend: function chooseFriend() {
+      Service.request('SummonSelector:open').then((function (result) {
+        if (!result) {
+          return;
+        }
+        var a = result.split(':');
+        var id = a[0];
+        var limit = a[1];
+        console.log(id, limit);
+        this.setState(function (currentState) {
+          var characterConfig = currentState.characterConfig;
+          var summonConfig = characterConfig.friend;
+          summonConfig.id = id;
+          summonConfig.limit = limit;
+          return {
+            characterConfig: characterConfig
+          };
+        });
+      }).bind(this))['catch'](function () {});
     },
     render: function render() {
       var totalWeaponHp = 0;
       var totalWeaponAtk = 0;
       var totalSummonAtk = 0;
       var totalSummonHp = 0;
+      var totalBonus = [{
+        attribute: 100,
+        character: 0,
+        magna: 100,
+        unknown: 100,
+        normal: 100
+      }, {
+        attribute: 100,
+        character: 0,
+        magna: 100,
+        unknown: 100,
+        normal: 100
+      }, {
+        attribute: 100,
+        character: 0,
+        magna: 100,
+        unknown: 100,
+        normal: 100
+      }, {
+        attribute: 100,
+        character: 0,
+        magna: 100,
+        unknown: 100,
+        normal: 100
+      }, {
+        attribute: 100,
+        character: 0,
+        magna: 100,
+        unknown: 100,
+        normal: 100
+      }, {
+        attribute: 100,
+        character: 0,
+        magna: 100,
+        unknown: 100,
+        normal: 100
+      }];
       var totalAmount = [{
         normal: 0,
         unknown: 0,
-        magna: 0
+        magna: 0,
+        baha: 0
       }, {
         normal: 0,
         unknown: 0,
-        magna: 0
+        magna: 0,
+        baha: 0
       }, {
         normal: 0,
         unknown: 0,
-        magna: 0
+        magna: 0,
+        baha: 0
       }, {
         normal: 0,
         unknown: 0,
-        magna: 0
+        magna: 0,
+        baha: 0
       }, {
         normal: 0,
         unknown: 0,
-        magna: 0
+        magna: 0,
+        baha: 0
       }, {
         normal: 0,
         unknown: 0,
-        magna: 0
+        magna: 0,
+        baha: 0
       }];
       var subWeaponDOM = this.state.weaponConfig.map(function (weapon, index) {
         if (index === 0) {
           return '';
         } else if (weapon.id) {
-          var weaponData = WeaponStore.nameMap.get(weapon.name);
+          var weaponData = WeaponStore.getData(weapon);
           var realData = WeaponStore.calculateRealData(weapon);
           console.log(realData);
           var realAtk = realData.attack;
@@ -236,6 +349,18 @@
           totalWeaponAtk += realAtk;
           totalWeaponHp += realHp;
           this.addAmount(totalAmount, realData.amount);
+          var starDOM = '';
+
+          if (weaponData.limit === 4) {
+            starDOM = React.createElement(
+              'div',
+              { className: 'prt-evolution-star-s' },
+              React.createElement('div', { className: 'prt-star-on' }),
+              React.createElement('div', { className: 'prt-star-on' }),
+              React.createElement('div', { className: 'prt-star-on' }),
+              React.createElement('div', { className: 'prt-ultimate-star-on' })
+            );
+          }
           return React.createElement(
             'div',
             { className: 'lis-weapon-sub', 'data-slot': index },
@@ -245,6 +370,7 @@
               React.createElement('img', { className: 'img-weapon-sub', src: "http://gbf.game-a.mbga.jp/assets/img/sp/assets/weapon/m/" + weapon.id + ".jpg" }),
               React.createElement('div', { className: 'shining-1' }),
               React.createElement('div', { className: 'shining-2' }),
+              starDOM,
               React.createElement(
                 'div',
                 { className: 'prt-quality' },
@@ -291,7 +417,7 @@
         }
       }, this);
       var mainWeaponDOM = '';
-      if (!this.state.weaponConfig[0].name) {
+      if (!this.state.weaponConfig[0].id) {
         mainWeaponDOM = React.createElement(
           'div',
           { className: 'cnt-weapon-main blank', 'data-slot': '0' },
@@ -318,13 +444,24 @@
           )
         );
       } else {
-        var weaponData = WeaponStore.nameMap.get(this.state.weaponConfig[0].name);
+        var weaponData = WeaponStore.getData(this.state.weaponConfig[0]);
         var realData = WeaponStore.calculateRealData(this.state.weaponConfig[0]);
         var realAtk = realData.attack;
         var realHp = realData.hp;
         totalWeaponAtk += realAtk;
         totalWeaponHp += realHp;
         this.addAmount(totalAmount, realData.amount);
+        var starDOM = '';
+        if (weaponData.limit === 4) {
+          starDOM = React.createElement(
+            'div',
+            { className: 'prt-evolution-star-s' },
+            React.createElement('div', { className: 'prt-star-on' }),
+            React.createElement('div', { className: 'prt-star-on' }),
+            React.createElement('div', { className: 'prt-star-on' }),
+            React.createElement('div', { className: 'prt-ultimate-star-on' })
+          );
+        }
         mainWeaponDOM = React.createElement(
           'div',
           { className: 'cnt-weapon-main', 'data-slot': '0' },
@@ -341,6 +478,7 @@
               'div',
               { className: 'btn-weapon' },
               React.createElement('img', { className: 'img-weapon-main', src: "http://gbf.game-a.mbga.jp/assets/img/sp/assets/weapon/ls/" + this.state.weaponConfig[0].id + ".jpg" }),
+              starDOM,
               React.createElement(
                 'div',
                 { className: 'prt-quality' },
@@ -376,32 +514,33 @@
       }
       var mainSummonDOM = '';
       if (this.state.summonConfig[0].id) {
-        var summonData = SummonStore.nameMap.get(this.state.summonConfig[0].name);
+        var summonData = SummonStore.getData(this.state.summonConfig[0]);
         var realData = SummonStore.calculateRealData(this.state.summonConfig[0]);
         var realAtk = realData.attack;
         var realHp = realData.hp;
         totalSummonHp += realHp;
         totalSummonAtk += realAtk;
-        var attribute = 2;
-        switch (summonData[2]) {
-          case '火':
-            attribute = 1;
-            break;
-          case '水':
-            attribute = 2;
-            break;
-          case '風':
-            attribute = 3;
-            break;
-          case '土':
-            attribute = 4;
-            break;
-          case '光':
-            attribute = 5;
-            break;
-          case '闇':
-            attribute = 6;
-            break;
+        var attribute = summonData.attribute;
+        var add = SummonStore.calculateSummonBonus(this.state.summonConfig[0]);
+        this.addBonus(totalBonus, add);
+        var starDOM = '';
+        if (summonData.limit === 4) {
+          starDOM = React.createElement(
+            'div',
+            { className: 'prt-evolution-star-s' },
+            React.createElement('div', { className: 'prt-star-on' }),
+            React.createElement('div', { className: 'prt-star-on' }),
+            React.createElement('div', { className: 'prt-star-on' }),
+            React.createElement('div', { className: 'prt-ultimate-star-on' })
+          );
+        } else if (summonData.limit === 3) {
+          starDOM = React.createElement(
+            'div',
+            { className: 'prt-evolution-star-s' },
+            React.createElement('div', { className: 'prt-star-on' }),
+            React.createElement('div', { className: 'prt-star-on' }),
+            React.createElement('div', { className: 'prt-star-on' })
+          );
         }
         mainSummonDOM = React.createElement(
           'div',
@@ -420,6 +559,7 @@
               ),
               React.createElement('div', { className: 'shining-1' }),
               React.createElement('div', { className: 'shining-2' }),
+              starDOM,
               React.createElement(
                 'div',
                 { className: 'prt-quality' },
@@ -494,12 +634,32 @@
         if (index === 0) {
           return '';
         } else if (summon.id) {
-          var summonData = SummonStore.nameMap.get(summon.name);
+          var summonData = SummonStore.getData(summon);
           var realData = SummonStore.calculateRealData(summon);
           var realHp = realData.hp;
           var realAtk = realData.attack;
           totalSummonHp += realHp;
           totalSummonAtk += realAtk;
+          var starDOM = '';
+
+          if (summonData.limit === 4) {
+            starDOM = React.createElement(
+              'div',
+              { className: 'prt-evolution-star-s' },
+              React.createElement('div', { className: 'prt-star-on' }),
+              React.createElement('div', { className: 'prt-star-on' }),
+              React.createElement('div', { className: 'prt-star-on' }),
+              React.createElement('div', { className: 'prt-ultimate-star-on' })
+            );
+          } else if (summonData.limit === 3) {
+            starDOM = React.createElement(
+              'div',
+              { className: 'prt-evolution-star-s' },
+              React.createElement('div', { className: 'prt-star-on' }),
+              React.createElement('div', { className: 'prt-star-on' }),
+              React.createElement('div', { className: 'prt-star-on' })
+            );
+          }
           return React.createElement(
             'div',
             { className: 'lis-summon-sub' },
@@ -514,6 +674,7 @@
               ),
               React.createElement('div', { className: 'shining-1' }),
               React.createElement('div', { className: 'shining-2' }),
+              starDOM,
               React.createElement(
                 'div',
                 { className: 'prt-quality' },
@@ -559,6 +720,80 @@
           );
         }
       }, this);
+
+      var friendSummonDOM = '';
+      if (this.state.characterConfig.friend.id) {
+        var data = SummonStore.getData(this.state.characterConfig.friend);
+        var add = SummonStore.calculateSummonBonus(this.state.characterConfig.friend);
+        this.addBonus(totalBonus, add);
+        friendSummonDOM = React.createElement(
+          'div',
+          { className: 'prt-deck-select' },
+          React.createElement(
+            'div',
+            { className: 'lis-deck' },
+            React.createElement(
+              'div',
+              { className: 'prt-supporter', 'data-summon-id': this.state.characterConfig.friend.id },
+              React.createElement(
+                'div',
+                { className: 'prt-supporter-name' },
+                React.createElement(
+                  'span',
+                  { className: 'txt-supporter-name' },
+                  'Friend Summon'
+                )
+              ),
+              React.createElement(
+                'div',
+                { className: 'prt-supporter-info' },
+                React.createElement(
+                  'div',
+                  { className: 'prt-summon-image', 'data-image': this.state.characterConfig.friend.id },
+                  React.createElement('img', { className: 'img-supporter-summon',
+                    src: "http://gbf.game-a1.mbga.jp/assets/img/sp/assets/summon/m/" + this.state.characterConfig.friend.id + ".jpg",
+                    alt: this.state.characterConfig.friend.id, draggable: 'false' }),
+                  React.createElement(
+                    'div',
+                    { className: 'prt-supporter-quality' },
+                    "+" + this.state.characterConfig.friend.plus
+                  )
+                ),
+                React.createElement(
+                  'div',
+                  { className: 'prt-supporter-detail' },
+                  React.createElement(
+                    'div',
+                    { className: 'prt-supporter-summon' },
+                    React.createElement(
+                      'span',
+                      { className: 'txt-summon-level' },
+                      "Lv " + this.state.characterConfig.friend.level
+                    ),
+                    React.createElement(
+                      'span',
+                      null,
+                      " " + data.name
+                    )
+                  ),
+                  React.createElement(
+                    'div',
+                    { className: 'prt-summon-skill  bless-rank1-style' },
+                    data.skill
+                  ),
+                  React.createElement('div', { className: 'prt-supporter-info' })
+                )
+              ),
+              React.createElement(
+                'div',
+                { className: 'prt-supporter-thumb' },
+                React.createElement('img', { className: 'img-supporter', src: 'http://gbf.game-a1.mbga.jp/assets/img/sp/assets/leader/a/150201_sw_1_01.png', alt: '150201_sw_1_01', draggable: 'false' })
+              )
+            )
+          )
+        );
+      }
+
       var weaponConfigDOM = '';
       var amountDOM = '';
       if (totalWeaponAtk) {
@@ -597,7 +832,18 @@
         var rows = [];
         this.state.weaponConfig.forEach(function (weapon, index) {
           if (weapon.id) {
-            var weaponData = WeaponStore.nameMap.get(weapon.name);
+            var weaponData = WeaponStore.getData(weapon);
+            var starDOM = '';
+            if (weaponData.limit === 4) {
+              starDOM = React.createElement(
+                'div',
+                { className: 'prt-evolution-star-s' },
+                React.createElement('div', { className: 'prt-star-on' }),
+                React.createElement('div', { className: 'prt-star-on' }),
+                React.createElement('div', { className: 'prt-star-on' }),
+                React.createElement('div', { className: 'prt-ultimate-star-on' })
+              );
+            }
             rows.push(React.createElement(
               'tr',
               { 'data-type': 'weapon', 'data-slot': index, key: "weapon-config-" + index },
@@ -614,7 +860,7 @@
               React.createElement(
                 'td',
                 null,
-                weapon.name
+                weaponData.name
               ),
               React.createElement(
                 'td',
@@ -642,6 +888,11 @@
                   { className: 'skillLevel', value: weapon.skillLevel, onChange: this.onWeaponSkillLevelChange },
                   from15
                 )
+              ),
+              React.createElement(
+                'td',
+                null,
+                starDOM
               )
             ));
           } else {}
@@ -702,10 +953,10 @@
         } else if (this.state.characterConfig.rank > 2) {
           rankAtk += this.state.characterConfig.rank * 40;
         }
-        var mainAttribute = this.state.weaponConfig[0].id ? WeaponStore.nameMap.get(this.state.weaponConfig[0].name).attribute : 1;
-        var magnaPercentage = 1 + totalAmount[mainAttribute - 1].magna / 100;
-        var normalPercentage = 1 + totalAmount[mainAttribute - 1].normal / 100;
-        var unknownPercentage = 1 + totalAmount[mainAttribute - 1].unknown / 100;
+        var mainAttribute = this.state.weaponConfig[0].id ? WeaponStore.getData(this.state.weaponConfig[0]).attribute : 1;
+        var magnaPercentage = 1 + totalAmount[mainAttribute - 1].magna / 100 * (totalBonus[mainAttribute - 1].magna / 100);
+        var normalPercentage = 1 + (totalBonus[mainAttribute - 1].character + totalAmount[mainAttribute - 1].baha + totalAmount[mainAttribute - 1].normal * (totalBonus[mainAttribute - 1].normal / 100)) / 100;
+        var unknownPercentage = 1 + totalAmount[mainAttribute - 1].unknown / 100 * (totalBonus[mainAttribute - 1].unknown / 100);
         var calculatedAtk = (totalSummonAtk + totalWeaponAtk + rankAtk) * magnaPercentage * normalPercentage * unknownPercentage;
         amountDOM = React.createElement(
           'div',
@@ -734,7 +985,7 @@
             { className: 'operator' },
             ' X '
           ),
-          '方陣: ' + (100 + totalAmount[mainAttribute - 1].magna) + '%',
+          '方陣: ' + (100 + totalAmount[mainAttribute - 1].magna) + '*' + totalBonus[mainAttribute - 1].magna + '%',
           React.createElement(
             'span',
             { className: 'operator' },
@@ -782,7 +1033,26 @@
         var rows = [];
         this.state.summonConfig.forEach(function (summon, index) {
           if (summon.id) {
-            var summonData = SummonStore.nameMap.get(summon.name);
+            var summonData = SummonStore.getData(summon);
+            var starDOM = '';
+            if (summonData.limit === 4) {
+              starDOM = React.createElement(
+                'div',
+                { className: 'prt-evolution-star-s' },
+                React.createElement('div', { className: 'prt-star-on' }),
+                React.createElement('div', { className: 'prt-star-on' }),
+                React.createElement('div', { className: 'prt-star-on' }),
+                React.createElement('div', { className: 'prt-ultimate-star-on' })
+              );
+            } else if (summonData.limit === 3) {
+              starDOM = React.createElement(
+                'div',
+                { className: 'prt-evolution-star-s' },
+                React.createElement('div', { className: 'prt-star-on' }),
+                React.createElement('div', { className: 'prt-star-on' }),
+                React.createElement('div', { className: 'prt-star-on' })
+              );
+            }
             rows.push(React.createElement(
               'tr',
               { 'data-type': 'summon', 'data-slot': index, key: "summon-config-" + index },
@@ -799,7 +1069,7 @@
               React.createElement(
                 'td',
                 null,
-                summon.name
+                summonData.name
               ),
               React.createElement(
                 'td',
@@ -822,11 +1092,7 @@
               React.createElement(
                 'td',
                 null,
-                React.createElement(
-                  'select',
-                  { className: 'limit', onChange: this.onLimitChange },
-                  from4
-                )
+                starDOM
               )
             ));
           } else {}
@@ -886,31 +1152,7 @@
             { 'for': 'rank' },
             'Rank'
           ),
-          React.createElement('input', { id: 'rank', value: this.state.characterConfig.rank })
-        ),
-        React.createElement(
-          'div',
-          null,
-          React.createElement(
-            'label',
-            { 'for': 'hp' },
-            'HP %'
-          ),
-          React.createElement('input', { id: 'hp', value: this.state.characterConfig.hp })
-        ),
-        React.createElement(
-          'div',
-          null,
-          React.createElement(
-            'label',
-            { 'for': 'attribute-bonus' },
-            'Attribute Bonus'
-          ),
-          React.createElement(
-            'button',
-            { id: 'attribute-bonus' },
-            'Attribute Bonus'
-          )
+          React.createElement('input', { id: 'rank', value: this.state.characterConfig.rank, onChange: this.onRankChange })
         ),
         React.createElement(
           'div',
@@ -922,11 +1164,12 @@
           ),
           React.createElement(
             'button',
-            { id: 'friend' },
+            { onClick: this.chooseFriend, id: 'friend' },
             'Choose Summon'
           )
         )
       );
+
       return React.createElement(
         'div',
         { className: 'planner' },
@@ -1014,12 +1257,13 @@
             )
           )
         ),
+        friendSummonDOM,
         amountDOM,
         characterConfigDOM,
         weaponConfigDOM,
         summonConfigDOM,
         React.createElement(WeaponSelector, { weapons: window.SSR_WEAPON_RAW }),
-        React.createElement(SummonSelector, { summons: window.SSR_SUMMON_RAW })
+        React.createElement(SummonSelector, { summons: window.SSR_SUMMON_LIMIT_BREAK })
       );
     }
   });

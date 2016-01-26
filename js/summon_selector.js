@@ -40,14 +40,33 @@
         return;
       }
 
-      this.resolve && this.resolve(activeNow.dataset.name, activeNow.dataset.limit);
+      this.resolve && this.resolve(activeNow.dataset.id + ':' + activeNow.dataset.limit);
       $(this.getDOMNode()).modal('hide');
     },
     render: function render() {
       var dom = this.props.summons.map(function (summon) {
+        var starDOM = '';
+        if (+summon[13] === 4) {
+          starDOM = React.createElement(
+            'div',
+            { className: 'prt-evolution-star-s' },
+            React.createElement('div', { className: 'prt-star-on' }),
+            React.createElement('div', { className: 'prt-star-on' }),
+            React.createElement('div', { className: 'prt-star-on' }),
+            React.createElement('div', { className: 'prt-ultimate-star-on' })
+          );
+        } else if (+summon[13] === 3) {
+          starDOM = React.createElement(
+            'div',
+            { className: 'prt-evolution-star-s' },
+            React.createElement('div', { className: 'prt-star-on' }),
+            React.createElement('div', { className: 'prt-star-on' }),
+            React.createElement('div', { className: 'prt-star-on' })
+          );
+        }
         return React.createElement(
           'tr',
-          { className: 'list-item', 'data-id': summon[0], 'data-name': summon[1], 'data-limit': 0 },
+          { className: 'list-item', 'data-id': summon[0], 'data-name': summon[1], 'data-limit': +summon[13] },
           React.createElement(
             'td',
             null,
@@ -57,6 +76,16 @@
             'td',
             null,
             summon[1]
+          ),
+          React.createElement(
+            'td',
+            null,
+            summon[7]
+          ),
+          React.createElement(
+            'td',
+            null,
+            starDOM
           )
         );
       });

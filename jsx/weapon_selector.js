@@ -37,7 +37,7 @@
         $(this.getDOMNode()).modal('hide');
         return;
       }
-      this.resolve && this.resolve(activeNow.dataset.name, activeNow.dataset.limit);
+      this.resolve && this.resolve(activeNow.dataset.id + ':' + activeNow.dataset.limit);
       $(this.getDOMNode()).modal('hide');
     },
     render: function() {
