@@ -802,14 +802,18 @@
             WeaponStore.getData(this.state.weaponConfig[0]).attribute : 1;
         var magnaPercentage = 1 + totalAmount[mainAttribute - 1].magna/100 * (totalBonus[mainAttribute - 1].magna / 100);
         var normalPercentage = 1 + (totalBonus[mainAttribute - 1].character + totalAmount[mainAttribute - 1].baha + totalAmount[mainAttribute - 1].normal * (totalBonus[mainAttribute - 1].normal / 100))/100 ;
-        var baha
+        var attributePercentage = 1 * (totalBonus[mainAttribute - 1].attribute) / 100;
         var unknownPercentage = 1 + totalAmount[mainAttribute - 1].unknown/100 * (totalBonus[mainAttribute - 1].unknown / 100);
-        var calculatedAtk = (totalSummonAtk + totalWeaponAtk + rankAtk) * magnaPercentage * normalPercentage * unknownPercentage;
+        var calculatedAtk = (totalSummonAtk + totalWeaponAtk + rankAtk) * attributePercentage * magnaPercentage * normalPercentage * unknownPercentage;
+        
         amountDOM = <div className="emulator amount">
                       <sup>基礎攻擊</sup>
                       {'(' + (totalWeaponAtk + totalSummonAtk)}
                       <span className="operator"> + </span>
                       { (rankAtk) +')'}
+                      <span className="operator"> X </span>
+                      <sup>屬性</sup>
+                      {'(' + (totalBonus[mainAttribute - 1].attribute) + '%)'}
                       <span className="operator"> X </span>
                       <sup>一般</sup>
                       {'(' + (100 + totalAmount[mainAttribute - 1].normal)}
@@ -916,7 +920,7 @@
                     <div className="navbar-header">
                       <a className="navbar-brand" href="#">
                       <sup>@Cygames, Inc</sup>
-                        Granblue Fantasy Planner <sub><span className="label label-warning label-sm">v0.0.1BETA RC2</span></sub>
+                        Granblue Fantasy Planner <sub><span className="label label-warning label-sm">v0.0.1BETA RC3</span></sub>
                       </a>
                       <p className="navbar-text">by <a href="http://github.com/alivedise">alivedise</a></p>
 

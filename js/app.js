@@ -1106,9 +1106,10 @@
         var mainAttribute = this.state.weaponConfig[0].id ? WeaponStore.getData(this.state.weaponConfig[0]).attribute : 1;
         var magnaPercentage = 1 + totalAmount[mainAttribute - 1].magna / 100 * (totalBonus[mainAttribute - 1].magna / 100);
         var normalPercentage = 1 + (totalBonus[mainAttribute - 1].character + totalAmount[mainAttribute - 1].baha + totalAmount[mainAttribute - 1].normal * (totalBonus[mainAttribute - 1].normal / 100)) / 100;
-        var baha;
+        var attributePercentage = 1 * totalBonus[mainAttribute - 1].attribute / 100;
         var unknownPercentage = 1 + totalAmount[mainAttribute - 1].unknown / 100 * (totalBonus[mainAttribute - 1].unknown / 100);
-        var calculatedAtk = (totalSummonAtk + totalWeaponAtk + rankAtk) * magnaPercentage * normalPercentage * unknownPercentage;
+        var calculatedAtk = (totalSummonAtk + totalWeaponAtk + rankAtk) * attributePercentage * magnaPercentage * normalPercentage * unknownPercentage;
+
         amountDOM = React.createElement(
           'div',
           { className: 'emulator amount' },
@@ -1124,6 +1125,17 @@
             ' + '
           ),
           rankAtk + ')',
+          React.createElement(
+            'span',
+            { className: 'operator' },
+            ' X '
+          ),
+          React.createElement(
+            'sup',
+            null,
+            '屬性'
+          ),
+          '(' + totalBonus[mainAttribute - 1].attribute + '%)',
           React.createElement(
             'span',
             { className: 'operator' },
@@ -1457,7 +1469,7 @@
                     React.createElement(
                       'span',
                       { className: 'label label-warning label-sm' },
-                      'v0.0.1BETA RC2'
+                      'v0.0.1BETA RC3'
                     )
                   )
                 ),
