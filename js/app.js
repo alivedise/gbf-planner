@@ -115,6 +115,10 @@
       WeaponStore.start();
       SummonStore.start();
       window.Appp = this;
+      window.addEventListener('hashchange', (function () {
+        console.log('parse hash');
+        this.parseHash();
+      }).bind(this));
     },
     parseHash: function parseHash() {
       var config = window.location.hash;
@@ -1469,7 +1473,7 @@
                     React.createElement(
                       'span',
                       { className: 'label label-warning label-sm' },
-                      'v0.0.1BETA RC4'
+                      'v0.0.1BETA RC5'
                     )
                   )
                 ),
