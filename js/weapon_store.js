@@ -161,7 +161,7 @@
             break;
           case '創樹方陣・攻刃II':
             var bw_coefficient = 12;
-            if ( skill_level < 10 ) {
+            if ( skillLevel < 10 ) {
               bw_coefficient += -0.3 + skillLevel * 1.8;
             } else {
               bw_coefficient += 18 + (skillLevel - 10) * 3 / 5;
@@ -260,7 +260,7 @@
             break;
           case '機炎方陣・攻刃II':
             var bw_coefficient = 12;
-            if ( skill_level < 10 ) {
+            if ( skillLevel < 10 ) {
               bw_coefficient += -0.3 + skillLevel * 1.8;
             } else {
               bw_coefficient += 18 + (skillLevel - 10) * 3 / 5;
@@ -322,7 +322,7 @@
             break;
           case '嵐竜方陣・背水':
             var bw_coefficient = 0;
-            if ( skill_level < 10 ) {
+            if ( skillLevel < 10 ) {
               bw_coefficient += -0.3 + skillLevel * 1.8;
             } else {
               bw_coefficient += 18 + (skillLevel - 10) * 3 / 5;

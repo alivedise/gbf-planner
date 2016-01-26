@@ -1135,6 +1135,7 @@
             '一般'
           ),
           '(' + (100 + totalAmount[mainAttribute - 1].normal),
+          '%',
           React.createElement(
             'sub',
             null,
@@ -1142,6 +1143,7 @@
           ),
           '+',
           totalAmount[mainAttribute - 1].baha,
+          '%',
           React.createElement(
             'sub',
             null,
@@ -1154,7 +1156,7 @@
             null,
             '角色'
           ),
-          ')+',
+          ')',
           React.createElement(
             'span',
             { className: 'operator' },
@@ -1455,7 +1457,7 @@
                     React.createElement(
                       'span',
                       { className: 'label label-warning label-sm' },
-                      'v0.0.1BETA'
+                      'v0.0.1BETA RC2'
                     )
                   )
                 ),

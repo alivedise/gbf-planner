@@ -813,11 +813,11 @@
                       <span className="operator"> X </span>
                       <sup>一般</sup>
                       {'(' + (100 + totalAmount[mainAttribute - 1].normal)}
-                      <sub>普刃</sub>+
+                      %<sub>普刃</sub>+
                       {totalAmount[mainAttribute - 1].baha}
-                      <sub>巴哈</sub>+
+                      %<sub>巴哈</sub>+
                       {totalBonus[mainAttribute - 1].character + '%'}
-                      <sub>角色</sub>)+
+                      <sub>角色</sub>)
                       <span className="operator"> X </span>
                       <sup>UN</sup>
                       {'(' + (100 + totalAmount[mainAttribute - 1].unknown) + '%)'}
@@ -916,7 +916,7 @@
                     <div className="navbar-header">
                       <a className="navbar-brand" href="#">
                       <sup>@Cygames, Inc</sup>
-                        Granblue Fantasy Planner <sub><span className="label label-warning label-sm">v0.0.1BETA</span></sub>
+                        Granblue Fantasy Planner <sub><span className="label label-warning label-sm">v0.0.1BETA RC2</span></sub>
                       </a>
                       <p className="navbar-text">by <a href="http://github.com/alivedise">alivedise</a></p>
 
