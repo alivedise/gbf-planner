@@ -42,9 +42,17 @@
     },
     render: function() {
       var dom = this.props.weapons.map(function(weapon) {
+        var starDOM = '';
+        if (weapon[14] !== '') {
+            starDOM = <div className="prt-evolution-star-s">
+                        <div className="prt-star-on"></div><div className="prt-star-on"></div><div className="prt-star-on"></div><div className="prt-ultimate-star-on"></div>
+                      </div>;
+        }
         return <tr className="list-item" data-id={weapon[0]} data-name={weapon[1]} data-limit={weapon[14] === '' ? 0 : 4}>
                 <td><img src={"http://gbf.game-a.mbga.jp/assets/img/sp/assets/weapon/m/"+weapon[0]+".jpg"} /></td>
                 <td>{weapon[1]}</td>
+                <td>{weapon[6] weapon[7]}</td>
+                <td>{starDOM}</td>
               </tr>
       });
       return <div className="modal fade" tabindex="-1" role="dialog">

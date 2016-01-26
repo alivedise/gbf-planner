@@ -156,6 +156,9 @@
             var weaponConfig = currentState.weaponConfig[slot];
             weaponConfig.id = id;
             weaponConfig.limit = +limit;
+            weaponConfig.plus = 0;
+            weaponConfig.level = 100;
+            weaponConfig.skillLevel = 10;
             return {
               weaponConfig: currentState.weaponConfig
             };
@@ -177,6 +180,8 @@
             var summonConfig = currentState.summonConfig[slot];
             summonConfig.id = id;
             summonConfig.limit = +limit;
+            summonConfig.plus = 0;
+            summonConfig.level = 100;
             return {
               summonConfig: currentState.summonConfig
             };
@@ -240,13 +245,16 @@
       var charString = this.state.characterConfig.rank + ';';
       var friendString = this.state.characterConfig.friend.id + ',' + this.state.characterConfig.friend.limit + ',' + this.state.characterConfig.friend.level + ',' +
                           this.state.characterConfig.friend.plus + ';';
-      var weaponString = this.state.weaponConfig.map(function(weapon) {
-        return weapon.id + ',' + weapon.limit + ',' + weapon.level + ',' + weapon.skillLevel + ',' + weapon.plus + ';';
+      var weaponString = '';
+      this.state.weaponConfig.map(function(weapon) {
+        weaponString += weapon.id + ',' + weapon.limit + ',' + weapon.level + ',' + weapon.skillLevel + ',' + weapon.plus + ';';
       });
-      var summonString = this.state.summonConfig.map(function(summon) {
-        return summon.id + ',' + summon.limit + ',' + summon.level + ',' + summon.plus + ';';
+      var summonString = '';
+      this.state.summonConfig.map(function(summon) {
+        summonString += summon.id + ',' + summon.limit + ',' + summon.level + ',' + summon.plus + ';';
       });
       window.location.hash = charString + friendString + weaponString + summonString;
+      this.refs.link.getDOMNode().value = window.location.href;
     },
     chooseFriend: function() {
       Service.request('SummonSelector:open').then(function(result) {
@@ -357,6 +365,63 @@
           baha: 0
         }
       ];
+
+
+      var friendSummonDOM = '';
+      if (this.state.characterConfig.friend.id) {
+        var data = SummonStore.getData(this.state.characterConfig.friend);
+        var add = SummonStore.calculateSummonBonus(this.state.characterConfig.friend);
+        this.addBonus(totalBonus, add);
+        friendSummonDOM =
+        <div className="prt-deck-select" onClick={this.chooseFriend}>
+        <div className="lis-deck">
+          <div className="prt-supporter" data-summon-id={this.state.characterConfig.friend.id}>
+            <div className="prt-supporter-name"><span className="txt-supporter-name">Friend Summon</span></div>
+            <div className="prt-supporter-info">
+              <div className="prt-summon-image" data-image={this.state.characterConfig.friend.id}>
+                <img className="img-supporter-summon"
+                  src={"http://gbf.game-a1.mbga.jp/assets/img/sp/assets/summon/m/"+this.state.characterConfig.friend.id+".jpg"}
+                  alt={this.state.characterConfig.friend.id} draggable="false" />
+                <div className="prt-supporter-quality">{"+" + this.state.characterConfig.friend.plus}</div>
+              </div>
+              <div className="prt-supporter-detail">
+                <div className="prt-supporter-summon">
+                  <span className="txt-summon-level">{"Lv " + this.state.characterConfig.friend.level}</span>
+                  <span>{" " + data.name}</span>
+                </div>
+                <div className="prt-summon-skill  bless-rank1-style">{data.skill}</div>
+                <div className="prt-supporter-info">
+                
+                </div>
+              </div>
+            </div>
+            <div className="prt-supporter-thumb">
+              <img className="img-supporter" src="http://gbf.game-a1.mbga.jp/assets/img/sp/assets/leader/a/150201_sw_1_01.png" alt="150201_sw_1_01" draggable="false" />
+              </div>
+          </div>
+        </div>
+        </div>
+      } else {
+        friendSummonDOM = 
+        <div className="prt-deck-select" onClick={this.chooseFriend}>
+          <div className="lis-deck">
+            <div className="prt-supporter" data-summon-id={this.state.characterConfig.friend.id}>
+              <div className="prt-supporter-name"><span className="txt-supporter-name">Friend Summon</span></div>
+              <div className="prt-supporter-info">
+                <div className="prt-summon-image blank">
+                </div>
+                <div className="prt-supporter-detail">
+                  <div className="prt-supporter-summon">
+                    Choose friend summon ..
+                  </div>
+                  <div className="prt-summon-skill  bless-rank1-style"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
       var subWeaponDOM = this.state.weaponConfig.map(function(weapon, index) {
         if (index === 0) {
           return '';
@@ -610,49 +675,15 @@
         }
       }, this);
 
-      var friendSummonDOM = '';
-      if (this.state.characterConfig.friend.id) {
-        var data = SummonStore.getData(this.state.characterConfig.friend);
-        var add = SummonStore.calculateSummonBonus(this.state.characterConfig.friend);
-        this.addBonus(totalBonus, add);
-        friendSummonDOM =
-        <div className="prt-deck-select">
-        <div className="lis-deck">
-          <div className="prt-supporter" data-summon-id={this.state.characterConfig.friend.id}>
-            <div className="prt-supporter-name"><span className="txt-supporter-name">Friend Summon</span></div>
-            <div className="prt-supporter-info">
-              <div className="prt-summon-image" data-image={this.state.characterConfig.friend.id}>
-                <img className="img-supporter-summon"
-                  src={"http://gbf.game-a1.mbga.jp/assets/img/sp/assets/summon/m/"+this.state.characterConfig.friend.id+".jpg"}
-                  alt={this.state.characterConfig.friend.id} draggable="false" />
-                <div className="prt-supporter-quality">{"+" + this.state.characterConfig.friend.plus}</div>
-              </div>
-              <div className="prt-supporter-detail">
-                <div className="prt-supporter-summon">
-                  <span className="txt-summon-level">{"Lv " + this.state.characterConfig.friend.level}</span>
-                  <span>{" " + data.name}</span>
-                </div>
-                <div className="prt-summon-skill  bless-rank1-style">{data.skill}</div>
-                <div className="prt-supporter-info">
-                
-                </div>
-              </div>
-            </div>
-            <div className="prt-supporter-thumb">
-              <img className="img-supporter" src="http://gbf.game-a1.mbga.jp/assets/img/sp/assets/leader/a/150201_sw_1_01.png" alt="150201_sw_1_01" draggable="false" />
-              </div>
-          </div>
-        </div>
-        </div>
-      }
-
-
       var weaponConfigDOM = '';
       var amountDOM = '';
       if (totalWeaponAtk) {
-        var from150 = [], from15=[], from100 = [], from99 = [];
+        var from150 = [], from15=[], from100 = [], from99 = [], from10 = [];
         for (var i = 1; i <= 150; i++) {
           from150.push(<option value={i}>{i}</option>);
+        }
+        for (var i = 1; i <= 10; i++) {
+          from10.push(<option value={i}>{i}</option>);
         }
         for (var i = 1; i <= 15; i++) {
           from15.push(<option value={i}>{i}</option>);
@@ -680,7 +711,7 @@
                       <td>{weaponData.name}</td>
                       <td><select className="level" value={weapon.level} onChange={this.onLevelChange}>{weaponData.max_level === 100 ? from100 : from150}</select></td>
                       <td><select className="plus" value={weapon.plus} onChange={this.onPlusChange}>{from99}</select></td>
-                      <td><select className="skillLevel" value={weapon.skillLevel} onChange={this.onWeaponSkillLevelChange}>{from15}</select></td>
+                      <td><select className="skillLevel" value={weapon.skillLevel} onChange={this.onWeaponSkillLevelChange}>{weaponData.limit === 4 ? from15 : from10}</select></td>
                       <td>
                         {starDOM}
                       </td>
@@ -723,15 +754,18 @@
       }
       var summonConfigDOM = '';
       if (totalSummonAtk) {
-        var from150 = [], from15=[], from100 = [], from4 = [], from99 = [];
+        var from150 = [], from15=[], from100 = [], from4 = [], from99 = [], from80 = [];
         for (var i = 1; i <= 150; i++) {
           from150.push(<option value={i}>{i}</option>);
         }
         for (var i = 0; i < 100; i++) {
           from99.push(<option value={i}>{i}</option>);
         }
-        for (var i = 0; i < 100; i++) {
+        for (var i = 1; i <= 100; i++) {
           from100.push(<option value={i}>{i}</option>);
+        }
+        for (var i = 1; i <= 80; i++) {
+          from80.push(<option value={i}>{i}</option>);
         }
         for (var i = 0; i <= 4; i++) {
           from4.push(<option value={i}>{i}</option>);
@@ -755,7 +789,7 @@
                 </td>
                       <td>{index + 1}</td>
                       <td>{summonData.name}</td>
-                      <td><select className="level" onChange={this.onLevelChange}>{from150}</select></td>
+                      <td><select className="level" onChange={this.onLevelChange}>{summonData.limit === 4 ? from150 : summonData.limit === 3 ? from100 : from80}</select></td>
                       <td><select className="plus" onChange={this.onPlusChange}>{from99}</select></td>
                       <td>{starDOM}</td>
                    </tr>);
@@ -767,12 +801,15 @@
                             <tbody>{rows}</tbody>
                           </table>
       }
-      var characterConfigDOM = <div>
-        <div><label for="rank">Rank</label><input id="rank" value={this.state.characterConfig.rank} onChange={this.onRankChange} /></div>
-        <div><label for="friend">Friend Summon</label><button onClick={this.chooseFriend} id="friend">Choose Summon</button></div>
-      </div>;
+      var characterConfigDOM = 
+        <form className="form-inline">
+          <div className="form-group">
+            <button onClick={this.saveConfigToHash} className="btn btn-info" id="friend">Generate link/產生連結</button><input className="form-control"  ref="link" readonly="true" />
+          </div>
+        </form>
 
       return <div className="planner">
+              {friendSummonDOM}
               <div className="cnt-index" onMouseOut={this.onMouseOut}  onMouseDown={this.onMouseDown}  onMouseUp={this.onMouseUp} onClick={this.onClick}>
                 <div className="cnt-weapon-list">
                   <div className="prt-total-weapon">
@@ -815,11 +852,12 @@
                   </div>
                 </div>
               </div>
-              {friendSummonDOM}         
-              {amountDOM}
-              {characterConfigDOM}
-              {weaponConfigDOM}
-              {summonConfigDOM}
+              <div className="container">
+                {amountDOM}
+                {characterConfigDOM}
+                {weaponConfigDOM}
+                {summonConfigDOM}
+              </div>
               <WeaponSelector weapons={window.SSR_WEAPON_RAW} />
               <SummonSelector summons={window.SSR_SUMMON_LIMIT_BREAK} />
             </div>

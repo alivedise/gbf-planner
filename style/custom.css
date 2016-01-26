@@ -5,33 +5,45 @@
 
 .cnt-index {
   width: auto;
-  padding: 0;
+  padding: 0;  
+  display: flex;
+  justify-content: center;
+}
+
+.prt-deck-select {
+  display: flex;
+  justify-content: center;
 }
 
 .cnt-weapon-main .prt-evolution-star-s {
   position: absolute;
-  top: 7px;
-  left: 7px;
+  bottom: -5px;
+  left: 25px;
   z-index: 10;
 }
 
 .prt-deck-select .lis-deck .prt-supporter {
   background-size: 720px 1173px;
-  width: 720px;
+  width: 640px;
 }
 
 .prt-deck-select .lis-deck .prt-supporter .prt-supporter-info .prt-supporter-detail {
   width: auto;
 }
 
-.lis-deck {
-  width: 640px;
+.prt-deck-select .lis-deck {
+  width: auto;
+}
+
+.prt-summon-image.blank {
+  background: url('http://gbf.game-a.mbga.jp/assets/img/sp/party/index/parts_small-sb5eeaee4a0.png') no-repeat 0 -262px;
+  background-size: 290px 1693px;
 }
 
 .cnt-weapon-sub .prt-evolution-star-s {
   position: absolute;
-  top: 5px;
-  left: 5px;
+  bottom: -5px;
+  left: 30px;
   z-index: 10;
 }
 
@@ -44,16 +56,16 @@
 
 .cnt-summon-main .prt-evolution-star-s {
   position: absolute;
-  top: 7px;
-  left: 7px;
+  bottom: -5px;
+  left: 25px;
   z-index: 10;
 }
 
 
 .cnt-summon-sub .prt-evolution-star-s {
   position: absolute;
-  top: 5px;
-  left: 5px;
+  bottom: -5px;
+  left: 30px;
   z-index: 10;
 }
 

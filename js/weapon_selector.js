@@ -44,6 +44,17 @@
     },
     render: function render() {
       var dom = this.props.weapons.map(function (weapon) {
+        var starDOM = '';
+        if (weapon[14] !== '') {
+          starDOM = React.createElement(
+            'div',
+            { className: 'prt-evolution-star-s' },
+            React.createElement('div', { className: 'prt-star-on' }),
+            React.createElement('div', { className: 'prt-star-on' }),
+            React.createElement('div', { className: 'prt-star-on' }),
+            React.createElement('div', { className: 'prt-ultimate-star-on' })
+          );
+        }
         return React.createElement(
           'tr',
           { className: 'list-item', 'data-id': weapon[0], 'data-name': weapon[1], 'data-limit': weapon[14] === '' ? 0 : 4 },
@@ -56,6 +67,16 @@
             'td',
             null,
             weapon[1]
+          ),
+          React.createElement(
+            'td',
+            null,
+            weapon[6]
+          ),
+          React.createElement(
+            'td',
+            null,
+            starDOM
           )
         );
       });

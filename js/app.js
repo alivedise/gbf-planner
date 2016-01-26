@@ -153,6 +153,9 @@
             var weaponConfig = currentState.weaponConfig[slot];
             weaponConfig.id = id;
             weaponConfig.limit = +limit;
+            weaponConfig.plus = 0;
+            weaponConfig.level = 100;
+            weaponConfig.skillLevel = 10;
             return {
               weaponConfig: currentState.weaponConfig
             };
@@ -174,6 +177,8 @@
             var summonConfig = currentState.summonConfig[slot];
             summonConfig.id = id;
             summonConfig.limit = +limit;
+            summonConfig.plus = 0;
+            summonConfig.level = 100;
             return {
               summonConfig: currentState.summonConfig
             };
@@ -236,13 +241,16 @@
     saveConfigToHash: function saveConfigToHash() {
       var charString = this.state.characterConfig.rank + ';';
       var friendString = this.state.characterConfig.friend.id + ',' + this.state.characterConfig.friend.limit + ',' + this.state.characterConfig.friend.level + ',' + this.state.characterConfig.friend.plus + ';';
-      var weaponString = this.state.weaponConfig.map(function (weapon) {
-        return weapon.id + ',' + weapon.limit + ',' + weapon.level + ',' + weapon.skillLevel + ',' + weapon.plus + ';';
+      var weaponString = '';
+      this.state.weaponConfig.map(function (weapon) {
+        weaponString += weapon.id + ',' + weapon.limit + ',' + weapon.level + ',' + weapon.skillLevel + ',' + weapon.plus + ';';
       });
-      var summonString = this.state.summonConfig.map(function (summon) {
-        return summon.id + ',' + summon.limit + ',' + summon.level + ',' + summon.plus + ';';
+      var summonString = '';
+      this.state.summonConfig.map(function (summon) {
+        summonString += summon.id + ',' + summon.limit + ',' + summon.level + ',' + summon.plus + ';';
       });
       window.location.hash = charString + friendString + weaponString + summonString;
+      this.refs.link.getDOMNode().value = window.location.href;
     },
     chooseFriend: function chooseFriend() {
       Service.request('SummonSelector:open').then((function (result) {
@@ -337,6 +345,117 @@
         magna: 0,
         baha: 0
       }];
+
+      var friendSummonDOM = '';
+      if (this.state.characterConfig.friend.id) {
+        var data = SummonStore.getData(this.state.characterConfig.friend);
+        var add = SummonStore.calculateSummonBonus(this.state.characterConfig.friend);
+        this.addBonus(totalBonus, add);
+        friendSummonDOM = React.createElement(
+          'div',
+          { className: 'prt-deck-select', onClick: this.chooseFriend },
+          React.createElement(
+            'div',
+            { className: 'lis-deck' },
+            React.createElement(
+              'div',
+              { className: 'prt-supporter', 'data-summon-id': this.state.characterConfig.friend.id },
+              React.createElement(
+                'div',
+                { className: 'prt-supporter-name' },
+                React.createElement(
+                  'span',
+                  { className: 'txt-supporter-name' },
+                  'Friend Summon'
+                )
+              ),
+              React.createElement(
+                'div',
+                { className: 'prt-supporter-info' },
+                React.createElement(
+                  'div',
+                  { className: 'prt-summon-image', 'data-image': this.state.characterConfig.friend.id },
+                  React.createElement('img', { className: 'img-supporter-summon',
+                    src: "http://gbf.game-a1.mbga.jp/assets/img/sp/assets/summon/m/" + this.state.characterConfig.friend.id + ".jpg",
+                    alt: this.state.characterConfig.friend.id, draggable: 'false' }),
+                  React.createElement(
+                    'div',
+                    { className: 'prt-supporter-quality' },
+                    "+" + this.state.characterConfig.friend.plus
+                  )
+                ),
+                React.createElement(
+                  'div',
+                  { className: 'prt-supporter-detail' },
+                  React.createElement(
+                    'div',
+                    { className: 'prt-supporter-summon' },
+                    React.createElement(
+                      'span',
+                      { className: 'txt-summon-level' },
+                      "Lv " + this.state.characterConfig.friend.level
+                    ),
+                    React.createElement(
+                      'span',
+                      null,
+                      " " + data.name
+                    )
+                  ),
+                  React.createElement(
+                    'div',
+                    { className: 'prt-summon-skill  bless-rank1-style' },
+                    data.skill
+                  ),
+                  React.createElement('div', { className: 'prt-supporter-info' })
+                )
+              ),
+              React.createElement(
+                'div',
+                { className: 'prt-supporter-thumb' },
+                React.createElement('img', { className: 'img-supporter', src: 'http://gbf.game-a1.mbga.jp/assets/img/sp/assets/leader/a/150201_sw_1_01.png', alt: '150201_sw_1_01', draggable: 'false' })
+              )
+            )
+          )
+        );
+      } else {
+        friendSummonDOM = React.createElement(
+          'div',
+          { className: 'prt-deck-select', onClick: this.chooseFriend },
+          React.createElement(
+            'div',
+            { className: 'lis-deck' },
+            React.createElement(
+              'div',
+              { className: 'prt-supporter', 'data-summon-id': this.state.characterConfig.friend.id },
+              React.createElement(
+                'div',
+                { className: 'prt-supporter-name' },
+                React.createElement(
+                  'span',
+                  { className: 'txt-supporter-name' },
+                  'Friend Summon'
+                )
+              ),
+              React.createElement(
+                'div',
+                { className: 'prt-supporter-info' },
+                React.createElement('div', { className: 'prt-summon-image blank' }),
+                React.createElement(
+                  'div',
+                  { className: 'prt-supporter-detail' },
+                  React.createElement(
+                    'div',
+                    { className: 'prt-supporter-summon' },
+                    'Choose friend summon ..'
+                  ),
+                  React.createElement('div', { className: 'prt-summon-skill  bless-rank1-style' })
+                )
+              )
+            )
+          )
+        );
+      }
+
       var subWeaponDOM = this.state.weaponConfig.map(function (weapon, index) {
         if (index === 0) {
           return '';
@@ -721,88 +840,23 @@
         }
       }, this);
 
-      var friendSummonDOM = '';
-      if (this.state.characterConfig.friend.id) {
-        var data = SummonStore.getData(this.state.characterConfig.friend);
-        var add = SummonStore.calculateSummonBonus(this.state.characterConfig.friend);
-        this.addBonus(totalBonus, add);
-        friendSummonDOM = React.createElement(
-          'div',
-          { className: 'prt-deck-select' },
-          React.createElement(
-            'div',
-            { className: 'lis-deck' },
-            React.createElement(
-              'div',
-              { className: 'prt-supporter', 'data-summon-id': this.state.characterConfig.friend.id },
-              React.createElement(
-                'div',
-                { className: 'prt-supporter-name' },
-                React.createElement(
-                  'span',
-                  { className: 'txt-supporter-name' },
-                  'Friend Summon'
-                )
-              ),
-              React.createElement(
-                'div',
-                { className: 'prt-supporter-info' },
-                React.createElement(
-                  'div',
-                  { className: 'prt-summon-image', 'data-image': this.state.characterConfig.friend.id },
-                  React.createElement('img', { className: 'img-supporter-summon',
-                    src: "http://gbf.game-a1.mbga.jp/assets/img/sp/assets/summon/m/" + this.state.characterConfig.friend.id + ".jpg",
-                    alt: this.state.characterConfig.friend.id, draggable: 'false' }),
-                  React.createElement(
-                    'div',
-                    { className: 'prt-supporter-quality' },
-                    "+" + this.state.characterConfig.friend.plus
-                  )
-                ),
-                React.createElement(
-                  'div',
-                  { className: 'prt-supporter-detail' },
-                  React.createElement(
-                    'div',
-                    { className: 'prt-supporter-summon' },
-                    React.createElement(
-                      'span',
-                      { className: 'txt-summon-level' },
-                      "Lv " + this.state.characterConfig.friend.level
-                    ),
-                    React.createElement(
-                      'span',
-                      null,
-                      " " + data.name
-                    )
-                  ),
-                  React.createElement(
-                    'div',
-                    { className: 'prt-summon-skill  bless-rank1-style' },
-                    data.skill
-                  ),
-                  React.createElement('div', { className: 'prt-supporter-info' })
-                )
-              ),
-              React.createElement(
-                'div',
-                { className: 'prt-supporter-thumb' },
-                React.createElement('img', { className: 'img-supporter', src: 'http://gbf.game-a1.mbga.jp/assets/img/sp/assets/leader/a/150201_sw_1_01.png', alt: '150201_sw_1_01', draggable: 'false' })
-              )
-            )
-          )
-        );
-      }
-
       var weaponConfigDOM = '';
       var amountDOM = '';
       if (totalWeaponAtk) {
         var from150 = [],
             from15 = [],
             from100 = [],
-            from99 = [];
+            from99 = [],
+            from10 = [];
         for (var i = 1; i <= 150; i++) {
           from150.push(React.createElement(
+            'option',
+            { value: i },
+            i
+          ));
+        }
+        for (var i = 1; i <= 10; i++) {
+          from10.push(React.createElement(
             'option',
             { value: i },
             i
@@ -886,7 +940,7 @@
                 React.createElement(
                   'select',
                   { className: 'skillLevel', value: weapon.skillLevel, onChange: this.onWeaponSkillLevelChange },
-                  from15
+                  weaponData.limit === 4 ? from15 : from10
                 )
               ),
               React.createElement(
@@ -1001,7 +1055,8 @@
             from15 = [],
             from100 = [],
             from4 = [],
-            from99 = [];
+            from99 = [],
+            from80 = [];
         for (var i = 1; i <= 150; i++) {
           from150.push(React.createElement(
             'option',
@@ -1016,8 +1071,15 @@
             i
           ));
         }
-        for (var i = 0; i < 100; i++) {
+        for (var i = 1; i <= 100; i++) {
           from100.push(React.createElement(
+            'option',
+            { value: i },
+            i
+          ));
+        }
+        for (var i = 1; i <= 80; i++) {
+          from80.push(React.createElement(
             'option',
             { value: i },
             i
@@ -1077,7 +1139,7 @@
                 React.createElement(
                   'select',
                   { className: 'level', onChange: this.onLevelChange },
-                  from150
+                  summonData.limit === 4 ? from150 : summonData.limit === 3 ? from100 : from80
                 )
               ),
               React.createElement(
@@ -1142,37 +1204,24 @@
         );
       }
       var characterConfigDOM = React.createElement(
-        'div',
-        null,
+        'form',
+        { className: 'form-inline' },
         React.createElement(
           'div',
-          null,
-          React.createElement(
-            'label',
-            { 'for': 'rank' },
-            'Rank'
-          ),
-          React.createElement('input', { id: 'rank', value: this.state.characterConfig.rank, onChange: this.onRankChange })
-        ),
-        React.createElement(
-          'div',
-          null,
-          React.createElement(
-            'label',
-            { 'for': 'friend' },
-            'Friend Summon'
-          ),
+          { className: 'form-group' },
           React.createElement(
             'button',
-            { onClick: this.chooseFriend, id: 'friend' },
-            'Choose Summon'
-          )
+            { onClick: this.saveConfigToHash, className: 'btn btn-info', id: 'friend' },
+            'Generate link/產生連結'
+          ),
+          React.createElement('input', { className: 'form-control', ref: 'link', readonly: 'true' })
         )
       );
 
       return React.createElement(
         'div',
         { className: 'planner' },
+        friendSummonDOM,
         React.createElement(
           'div',
           { className: 'cnt-index', onMouseOut: this.onMouseOut, onMouseDown: this.onMouseDown, onMouseUp: this.onMouseUp, onClick: this.onClick },
@@ -1257,11 +1306,14 @@
             )
           )
         ),
-        friendSummonDOM,
-        amountDOM,
-        characterConfigDOM,
-        weaponConfigDOM,
-        summonConfigDOM,
+        React.createElement(
+          'div',
+          { className: 'container' },
+          amountDOM,
+          characterConfigDOM,
+          weaponConfigDOM,
+          summonConfigDOM
+        ),
         React.createElement(WeaponSelector, { weapons: window.SSR_WEAPON_RAW }),
         React.createElement(SummonSelector, { summons: window.SSR_SUMMON_LIMIT_BREAK })
       );
