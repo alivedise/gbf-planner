@@ -4,6 +4,7 @@
   exports.SummonStore = {
     start: function() {
       this.idLimitMap = new Map();
+      this.baseIdMap = new Map();
       window.SSR_SUMMON_LIMIT_BREAK.forEach(function(summon) {
         var limit = +summon[13] || 0;
         var summonData = {
@@ -16,12 +17,26 @@
           attribute: this.getElementAttribute(summon[2]),
           type: summon[3],
           rarity: 'ssr',
-          max_level: 100,
+          max_level: limit === 4 ? 150 : 100,
           skill: summon[7],
           limit: limit
         };
+        if (summonData.limit === 3) {
+          this.baseIdMap.set(summonData.id, summonData);
+        }
         var key = summon[0] + ':' + limit;
         this.idLimitMap.set(key, summonData);
+      }, this);
+      this.parseUltimate();
+    },
+
+    parseUltimate: function() {
+      this.idLimitMap.forEach(function(instance) {
+        if (instance.limit === 4) {
+          var id = instance.id;
+          instance.lv100_atk = this.baseIdMap.get(id).max_atk;
+          instance.lv100_hp = this.baseIdMap.get(id).max_hp;
+        }
       }, this);
     },
 
@@ -520,12 +535,12 @@
     },
     calculateRealData: function(config) {
       var data = this.getData(config);
-      var isFinalEvo = data.finalLiberation;
+      var isFinalEvo = (data.limit === 4);
       if (isFinalEvo) {
-        var diffAtk = Math.ceil((data.lv100_atk - data.min_atk) / 100);
-        var diffHp = Math.ceil((data.lv100_hp - data.min_hp) / 100);
-        var diffAtk2 = Math.ceil((data.max_atk - data.lv100_atk) / 50);
-        var diffHp2 = Math.ceil((data.max_hp - data.lv100_hp) / 50);
+        var diffAtk = (data.lv100_atk - data.min_atk) / 100;
+        var diffHp = (data.lv100_hp - data.min_hp) / 100;
+        var diffAtk2 = (data.max_atk - data.lv100_atk) / 50;
+        var diffHp2 = (data.max_hp - data.lv100_hp) / 50;
         if (+config.level === 1) {
           return {
             attack: data.min_atk + 5 * config.plus,
@@ -536,25 +551,30 @@
             attack: data.lv100_atk + 5 * config.plus,
             hp: data.lv100_hp + 1 * config.plus
           }
+        } else if (+config.level === 150) {
+          return {
+            attack: data.max_atk + 5 * config.plus,
+            hp: data.max_hp + 1 * config.plus
+          }
         } else if (+config.level === 2) {
           return {
-            attack: data.min_atk + diffAtk * 2 + 5 * config.plus,
-            hp: data.min_hp + diffHp * 2 + config.plus
+            attack: Math.ceil(data.min_atk + diffAtk * 2 + 5 * config.plus),
+            hp: Math.ceil(data.min_hp + diffHp * 2 + config.plus)
           }
         } else if (+config.level < 100) {
           return {
-            attack: data.min_atk + diffAtk * config.level + 5 * config.plus,
-            hp: data.min_hp + diffHp * config.level + config.plus
+            attack: Math.ceil(data.min_atk + diffAtk * config.level + 5 * config.plus),
+            hp: Math.ceil(data.min_hp + diffHp * config.level + config.plus)
           }
         } else {
           return {
-            attack: data.lv100_atk + diffAtk2 * config.level + 5 * config.plus,
-            hp: data.lv100_hp + diffHp2 * config.level + config.plus
+            attack: Math.ceil(data.lv100_atk + diffAtk2 * (config.level - 100) + 5 * config.plus),
+            hp: Math.ceil(data.lv100_hp + diffHp2 * (config.level - 100) + config.plus)
           }
         }
       } else {
-        var diffAtk = Math.ceil((data.max_atk - data.min_atk) / data.max_level);
-        var diffHp = Math.ceil((data.max_hp - data.min_hp) / data.max_level);
+        var diffAtk = (data.max_atk - data.min_atk) / data.max_level;
+        var diffHp = (data.max_hp - data.min_hp) / data.max_level;
         if (+config.level === 1) {
           return {
             attack: data.min_atk + 5 * config.plus,
@@ -567,13 +587,13 @@
           }
         } else if (+config.level === 2) {
           return {
-            attack: data.min_atk + diffAtk * 2 + 5 * config.plus,
-            hp: data.min_hp + diffHp * 2 + config.plus
+            attack: Math.ceil(data.min_atk + diffAtk * 2 + 5 * config.plus),
+            hp: Math.ceil(data.min_hp + diffHp * 2 + config.plus)
           }
         } else {
           return {
-            attack: data.min_atk + diffAtk * config.level + 5 * config.plus,
-            hp: data.min_hp + diffHp * config.level + config.plus
+            attack: Math.ceil(data.min_atk + diffAtk * config.level + 5 * config.plus),
+            hp: Math.ceil(data.min_hp + diffHp * config.level + config.plus)
           }
         }
       }

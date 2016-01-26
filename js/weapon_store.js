@@ -364,17 +364,23 @@
       var data = this.getData(config);
       var isFinalEvo = (data.limit === 4);
       if (isFinalEvo) {
-        var diffAtk = Math.ceil((data.lv100_atk - data.min_atk) / 100);
-        var diffHp = Math.ceil((data.lv100_hp - data.min_hp) / 100);
-        var diffAtk2 = Math.ceil((data.max_atk - data.lv100_atk) / 50);
-        var diffHp2 = Math.ceil((data.max_hp - data.lv100_hp) / 50);
+        var diffAtk = (data.lv100_atk - data.min_atk) / 100;
+        var diffHp = (data.lv100_hp - data.min_hp) / 100;
+        var diffAtk2 = (data.max_atk - data.lv100_atk) / 50;
+        var diffHp2 = (data.max_hp - data.lv100_hp) / 50;
         if (+config.level === 1) {
           return {
             attack: data.min_atk + 5 * config.plus,
             hp: data.min_hp + 1 * config.plus,
             amount: this.calculateAttackBladeAmount(config)
           }
-        } else if (+config.level === 100) {
+        } else if (+config.level === 150) {
+          return {
+            attack: data.max_atk + 5 * config.plus,
+            hp: data.max_hp + 1 * config.plus,
+            amount: this.calculateAttackBladeAmount(config)
+          }
+        }  else if (+config.level === 100) {
           return {
             attack: data.lv100_atk + 5 * config.plus,
             hp: data.lv100_hp + 1 * config.plus,
@@ -382,20 +388,20 @@
           }
         } else if (+config.level === 2) {
           return {
-            attack: data.min_atk + diffAtk * 2 + 5 * config.plus,
-            hp: data.min_hp + diffHp * 2 + config.plus,
+            attack: Math.ceil(data.min_atk + diffAtk * 2 + 5 * config.plus),
+            hp: Math.ceil(data.min_hp + diffHp * 2 + config.plus),
             amount: this.calculateAttackBladeAmount(config)
           }
         } else if (+config.level < 100) {
           return {
-            attack: data.min_atk + diffAtk * config.level + 5 * config.plus,
-            hp: data.min_hp + diffHp * config.level + config.plus,
+            attack: Math.ceil(data.min_atk + diffAtk * config.level + 5 * config.plus),
+            hp: Math.ceil(data.min_hp + diffHp * config.level + config.plus),
             amount: this.calculateAttackBladeAmount(config)
           }
         } else {
           return {
-            attack: data.lv100_atk + diffAtk2 * config.level + 5 * config.plus,
-            hp: data.lv100_hp + diffHp2 * config.level + config.plus,
+            attack: Math.ceil(data.lv100_atk + diffAtk2 * (config.level - 100) + 5 * config.plus),
+            hp: Math.ceil(data.lv100_hp + diffHp2 * (config.level - 100) + config.plus),
             amount: this.calculateAttackBladeAmount(config)
           }
         }
@@ -416,14 +422,14 @@
           }
         } else if (+config.level === 2) {
           return {
-            attack: data.min_atk + diffAtk * 2 + 5 * config.plus,
-            hp: data.min_hp + diffHp * 2 + config.plus,
+            attack: Math.ceil(data.min_atk + diffAtk * 2 + 5 * config.plus),
+            hp: Math.ceil(data.min_hp + diffHp * 2 + config.plus),
             amount: this.calculateAttackBladeAmount(config)
           }
         } else {
           return {
-            attack: data.min_atk + diffAtk * config.level + 5 * config.plus,
-            hp: data.min_hp + diffHp * config.level + config.plus,
+            attack: Math.ceil(data.min_atk + diffAtk * config.level + 5 * config.plus),
+            hp: Math.ceil(data.min_hp + diffHp * config.level + config.plus),
             amount: this.calculateAttackBladeAmount(config)
           }
         }

@@ -35,21 +35,31 @@
       var slot = tr.dataset.slot;
       var value = +$(evt.target).find(':selected').text();
       console.log(slot, value);
-      this.setState(function (previuosState) {
-        if (type === 'weapon') {
-          var weaponConfig = previuosState.weaponConfig;
-          weaponConfig[+slot].plus = value;
+      if (slot === 'f') {
+        this.setState(function (previuosState) {
+          var summonConfig = previuosState.characterConfig.friend;
+          summonConfig.plus = value;
           return {
-            weaponConfig: weaponConfig
+            friend: previuosState.characterConfig.friend
           };
-        } else {
-          var summonConfig = previuosState.summonConfig;
-          summonConfig[+slot].plus = value;
-          return {
-            summonConfig: summonConfig
-          };
-        }
-      });
+        });
+      } else {
+        this.setState(function (previuosState) {
+          if (type === 'weapon') {
+            var weaponConfig = previuosState.weaponConfig;
+            weaponConfig[+slot].plus = value;
+            return {
+              weaponConfig: weaponConfig
+            };
+          } else {
+            var summonConfig = previuosState.summonConfig;
+            summonConfig[+slot].plus = value;
+            return {
+              summonConfig: summonConfig
+            };
+          }
+        });
+      }
     },
     onLevelChange: function onLevelChange(evt) {
       var tr = $(evt.target).closest('tr')[0];
@@ -57,21 +67,31 @@
       var slot = tr.dataset.slot;
       var value = +$(evt.target).find(':selected').text();
       console.log(slot, value);
-      this.setState(function (previuosState) {
-        if (type === 'weapon') {
-          var weaponConfig = previuosState.weaponConfig;
-          weaponConfig[+slot].level = value;
+      if (slot === 'f') {
+        this.setState(function (previuosState) {
+          var summonConfig = previuosState.characterConfig.friend;
+          summonConfig.level = value;
           return {
-            weaponConfig: weaponConfig
+            friend: previuosState.characterConfig.friend
           };
-        } else {
-          var summonConfig = previuosState.summonConfig;
-          summonConfig[+slot].level = value;
-          return {
-            summonConfig: summonConfig
-          };
-        }
-      });
+        });
+      } else {
+        this.setState(function (previuosState) {
+          if (type === 'weapon') {
+            var weaponConfig = previuosState.weaponConfig;
+            weaponConfig[+slot].level = value;
+            return {
+              weaponConfig: weaponConfig
+            };
+          } else {
+            var summonConfig = previuosState.summonConfig;
+            summonConfig[+slot].level = value;
+            return {
+              summonConfig: summonConfig
+            };
+          }
+        });
+      }
     },
     onWeaponSkillLevelChange: function onWeaponSkillLevelChange(evt) {
       var tr = $(evt.target).closest('tr')[0];
@@ -266,6 +286,8 @@
           var summonConfig = characterConfig.friend;
           summonConfig.id = id;
           summonConfig.limit = limit;
+          summonConfig.level = 100;
+          summonConfig.plus = 0;
           return {
             characterConfig: characterConfig
           };
@@ -349,8 +371,11 @@
       var friendSummonDOM = '';
       if (this.state.characterConfig.friend.id) {
         var data = SummonStore.getData(this.state.characterConfig.friend);
+        var realData = SummonStore.calculateRealData(this.state.characterConfig.friend);
         var add = SummonStore.calculateSummonBonus(this.state.characterConfig.friend);
         this.addBonus(totalBonus, add);
+        totalSummonAtk += realData.attack;
+        totalSummonHp += realData.hp;
         friendSummonDOM = React.createElement(
           'div',
           { className: 'prt-deck-select', onClick: this.chooseFriend },
@@ -479,6 +504,27 @@
               React.createElement('div', { className: 'prt-star-on' }),
               React.createElement('div', { className: 'prt-ultimate-star-on' })
             );
+          } else if (weapon.level > 80) {
+            starDOM = React.createElement(
+              'div',
+              { className: 'prt-evolution-star-s' },
+              React.createElement('div', { className: 'prt-star-on' }),
+              React.createElement('div', { className: 'prt-star-on' }),
+              React.createElement('div', { className: 'prt-star-on' })
+            );
+          } else if (weapon.level > 80) {
+            starDOM = React.createElement(
+              'div',
+              { className: 'prt-evolution-star-s' },
+              React.createElement('div', { className: 'prt-star-on' }),
+              React.createElement('div', { className: 'prt-star-on' })
+            );
+          } else if (weapon.level > 40) {
+            starDOM = React.createElement(
+              'div',
+              { className: 'prt-evolution-star-s' },
+              React.createElement('div', { className: 'prt-star-on' })
+            );
           }
           return React.createElement(
             'div',
@@ -563,6 +609,7 @@
           )
         );
       } else {
+        var weapon = this.state.weaponConfig[0];
         var weaponData = WeaponStore.getData(this.state.weaponConfig[0]);
         var realData = WeaponStore.calculateRealData(this.state.weaponConfig[0]);
         var realAtk = realData.attack;
@@ -579,6 +626,28 @@
             React.createElement('div', { className: 'prt-star-on' }),
             React.createElement('div', { className: 'prt-star-on' }),
             React.createElement('div', { className: 'prt-ultimate-star-on' })
+          );
+        } else if (weapon.level > 80) {
+          starDOM = React.createElement(
+            'div',
+            { className: 'prt-evolution-star-s' },
+            React.createElement('div', { className: 'prt-star-on' }),
+            React.createElement('div', { className: 'prt-star-on' }),
+            React.createElement('div', { className: 'prt-star-on' })
+          );
+        } else if (weapon.level > 60) {
+          starDOM = React.createElement(
+            'div',
+            { className: 'prt-evolution-star-s' },
+            React.createElement('div', { className: 'prt-star-on' }),
+            React.createElement('div', { className: 'prt-star-on' })
+          );
+        } else if (weapon.level > 40) {
+          starDOM = React.createElement(
+            'div',
+            { className: 'prt-evolution-star-s' },
+            React.createElement('div', { className: 'prt-star-on' }),
+            React.createElement('div', { className: 'prt-star-on' })
           );
         }
         mainWeaponDOM = React.createElement(
@@ -633,6 +702,7 @@
       }
       var mainSummonDOM = '';
       if (this.state.summonConfig[0].id) {
+        var summon = this.state.summonConfig[0];
         var summonData = SummonStore.getData(this.state.summonConfig[0]);
         var realData = SummonStore.calculateRealData(this.state.summonConfig[0]);
         var realAtk = realData.attack;
@@ -658,6 +728,19 @@
             { className: 'prt-evolution-star-s' },
             React.createElement('div', { className: 'prt-star-on' }),
             React.createElement('div', { className: 'prt-star-on' }),
+            React.createElement('div', { className: 'prt-star-on' })
+          );
+        } else if (summon.level > 60) {
+          starDOM = React.createElement(
+            'div',
+            { className: 'prt-evolution-star-s' },
+            React.createElement('div', { className: 'prt-star-on' }),
+            React.createElement('div', { className: 'prt-star-on' })
+          );
+        } else if (summon.level > 40) {
+          starDOM = React.createElement(
+            'div',
+            { className: 'prt-evolution-star-s' },
             React.createElement('div', { className: 'prt-star-on' })
           );
         }
@@ -776,6 +859,19 @@
               { className: 'prt-evolution-star-s' },
               React.createElement('div', { className: 'prt-star-on' }),
               React.createElement('div', { className: 'prt-star-on' }),
+              React.createElement('div', { className: 'prt-star-on' })
+            );
+          } else if (summon.level > 60) {
+            starDOM = React.createElement(
+              'div',
+              { className: 'prt-evolution-star-s' },
+              React.createElement('div', { className: 'prt-star-on' }),
+              React.createElement('div', { className: 'prt-star-on' })
+            );
+          } else if (summon.level > 40) {
+            starDOM = React.createElement(
+              'div',
+              { className: 'prt-evolution-star-s' },
               React.createElement('div', { className: 'prt-star-on' })
             );
           }
@@ -1010,12 +1106,18 @@
         var mainAttribute = this.state.weaponConfig[0].id ? WeaponStore.getData(this.state.weaponConfig[0]).attribute : 1;
         var magnaPercentage = 1 + totalAmount[mainAttribute - 1].magna / 100 * (totalBonus[mainAttribute - 1].magna / 100);
         var normalPercentage = 1 + (totalBonus[mainAttribute - 1].character + totalAmount[mainAttribute - 1].baha + totalAmount[mainAttribute - 1].normal * (totalBonus[mainAttribute - 1].normal / 100)) / 100;
+        var baha;
         var unknownPercentage = 1 + totalAmount[mainAttribute - 1].unknown / 100 * (totalBonus[mainAttribute - 1].unknown / 100);
         var calculatedAtk = (totalSummonAtk + totalWeaponAtk + rankAtk) * magnaPercentage * normalPercentage * unknownPercentage;
         amountDOM = React.createElement(
           'div',
           { className: 'emulator amount' },
-          '基礎攻擊:(' + (totalWeaponAtk + totalSummonAtk),
+          React.createElement(
+            'sup',
+            null,
+            '基礎攻擊'
+          ),
+          '(' + (totalWeaponAtk + totalSummonAtk),
           React.createElement(
             'span',
             { className: 'operator' },
@@ -1027,26 +1129,66 @@
             { className: 'operator' },
             ' X '
           ),
-          '一般:' + (100 + totalAmount[mainAttribute - 1].normal) + '%',
+          React.createElement(
+            'sup',
+            null,
+            '一般'
+          ),
+          '(' + (100 + totalAmount[mainAttribute - 1].normal),
+          React.createElement(
+            'sub',
+            null,
+            '普刃'
+          ),
+          '+',
+          totalAmount[mainAttribute - 1].baha,
+          React.createElement(
+            'sub',
+            null,
+            '巴哈'
+          ),
+          '+',
+          totalBonus[mainAttribute - 1].character + '%',
+          React.createElement(
+            'sub',
+            null,
+            '角色'
+          ),
+          ')+',
           React.createElement(
             'span',
             { className: 'operator' },
             ' X '
           ),
-          'UN: ' + (100 + totalAmount[mainAttribute - 1].unknown) + '%',
+          React.createElement(
+            'sup',
+            null,
+            'UN'
+          ),
+          '(' + (100 + totalAmount[mainAttribute - 1].unknown) + '%)',
           React.createElement(
             'span',
             { className: 'operator' },
             ' X '
           ),
-          '方陣: ' + (100 + totalAmount[mainAttribute - 1].magna) + '*' + totalBonus[mainAttribute - 1].magna + '%',
+          React.createElement(
+            'sup',
+            null,
+            '方陣'
+          ),
+          '(' + (100 + totalAmount[mainAttribute - 1].magna) + '*' + totalBonus[mainAttribute - 1].magna + '%)',
           React.createElement(
             'span',
             { className: 'operator' },
             ' = '
           ),
           React.createElement('br', null),
-          '總合攻擊: ' + Math.round(calculatedAtk)
+          React.createElement(
+            'sup',
+            null,
+            '總合攻擊'
+          ),
+          '' + Math.round(calculatedAtk)
         );
       }
       var summonConfigDOM = '';
@@ -1138,7 +1280,7 @@
                 null,
                 React.createElement(
                   'select',
-                  { className: 'level', onChange: this.onLevelChange },
+                  { className: 'level', value: summon.level, onChange: this.onLevelChange },
                   summonData.limit === 4 ? from150 : summonData.limit === 3 ? from100 : from80
                 )
               ),
@@ -1147,7 +1289,7 @@
                 null,
                 React.createElement(
                   'select',
-                  { className: 'plus', onChange: this.onPlusChange },
+                  { className: 'plus', value: summon.plus, onChange: this.onPlusChange },
                   from99
                 )
               ),
@@ -1159,6 +1301,71 @@
             ));
           } else {}
         }, this);
+        if (this.state.characterConfig.friend.id) {
+          var summon = this.state.characterConfig.friend;
+          var summonData = SummonStore.getData(this.state.characterConfig.friend);
+          var starDOM = '';
+          if (summonData.limit === 4) {
+            starDOM = React.createElement(
+              'div',
+              { className: 'prt-evolution-star-s' },
+              React.createElement('div', { className: 'prt-star-on' }),
+              React.createElement('div', { className: 'prt-star-on' }),
+              React.createElement('div', { className: 'prt-star-on' }),
+              React.createElement('div', { className: 'prt-ultimate-star-on' })
+            );
+          } else if (summonData.limit === 3) {
+            starDOM = React.createElement(
+              'div',
+              { className: 'prt-evolution-star-s' },
+              React.createElement('div', { className: 'prt-star-on' }),
+              React.createElement('div', { className: 'prt-star-on' }),
+              React.createElement('div', { className: 'prt-star-on' })
+            );
+          }
+          rows.push(React.createElement(
+            'tr',
+            { 'data-type': 'summon', 'data-slot': 'f', key: "summon-config-friend" },
+            React.createElement(
+              'td',
+              { className: 'list-item' },
+              React.createElement('img', { src: "http://gbf.game-a.mbga.jp/assets/img/sp/assets/summon/party_sub/" + summonData.id + ".jpg" })
+            ),
+            React.createElement(
+              'td',
+              null,
+              'Friend'
+            ),
+            React.createElement(
+              'td',
+              null,
+              summonData.name
+            ),
+            React.createElement(
+              'td',
+              null,
+              React.createElement(
+                'select',
+                { className: 'level', value: summon.level, onChange: this.onLevelChange },
+                summonData.limit === 4 ? from150 : summonData.limit === 3 ? from100 : from80
+              )
+            ),
+            React.createElement(
+              'td',
+              null,
+              React.createElement(
+                'select',
+                { className: 'plus', value: summon.plus, onChange: this.onPlusChange },
+                from99
+              )
+            ),
+            React.createElement(
+              'td',
+              null,
+              starDOM
+            )
+          ));
+        }
         summonConfigDOM = React.createElement(
           'table',
           { className: 'table table-condensed table-striped table-hover' },
@@ -1214,13 +1421,58 @@
             { onClick: this.saveConfigToHash, className: 'btn btn-info', id: 'friend' },
             'Generate link/產生連結'
           ),
-          React.createElement('input', { className: 'form-control', ref: 'link', readonly: 'true' })
+          React.createElement('input', { className: 'form-control', ref: 'link', readonly: 'true', value: window.location.href })
         )
       );
 
       return React.createElement(
         'div',
         { className: 'planner' },
+        React.createElement(
+          'header',
+          null,
+          React.createElement(
+            'nav',
+            { className: 'navbar navbar-inverse' },
+            React.createElement(
+              'div',
+              { className: 'container-fluid' },
+              React.createElement(
+                'div',
+                { className: 'navbar-header' },
+                React.createElement(
+                  'a',
+                  { className: 'navbar-brand', href: '#' },
+                  React.createElement(
+                    'sup',
+                    null,
+                    '@Cygames, Inc'
+                  ),
+                  'Granblue Fantasy Planner ',
+                  React.createElement(
+                    'sub',
+                    null,
+                    React.createElement(
+                      'span',
+                      { className: 'label label-warning label-sm' },
+                      'v0.0.1BETA'
+                    )
+                  )
+                ),
+                React.createElement(
+                  'p',
+                  { className: 'navbar-text' },
+                  'by ',
+                  React.createElement(
+                    'a',
+                    { href: 'http://github.com/alivedise' },
+                    'alivedise'
+                  )
+                )
+              )
+            )
+          )
+        ),
         friendSummonDOM,
         React.createElement(
           'div',

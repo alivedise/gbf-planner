@@ -37,21 +37,31 @@
       var slot = tr.dataset.slot;
       var value = +$(evt.target).find(':selected').text();
       console.log(slot, value);
-      this.setState(function(previuosState) {
-        if (type === 'weapon') {
-          var weaponConfig = previuosState.weaponConfig;
-          weaponConfig[+slot].plus = value;
+      if (slot === 'f') {
+        this.setState(function(previuosState) {
+          var summonConfig = previuosState.characterConfig.friend;
+          summonConfig.plus = value;
           return {
-            weaponConfig: weaponConfig
+            friend: previuosState.characterConfig.friend
           }
-        } else {
-          var summonConfig = previuosState.summonConfig;
-          summonConfig[+slot].plus = value;
-          return {
-            summonConfig: summonConfig
+        });
+      } else {
+        this.setState(function(previuosState) {
+          if (type === 'weapon') {
+            var weaponConfig = previuosState.weaponConfig;
+            weaponConfig[+slot].plus = value;
+            return {
+              weaponConfig: weaponConfig
+            }
+          } else {
+            var summonConfig = previuosState.summonConfig;
+            summonConfig[+slot].plus = value;
+            return {
+              summonConfig: summonConfig
+            }
           }
-        }
-      });
+        });
+      }
     },
     onLevelChange: function(evt) {
       var tr = $(evt.target).closest('tr')[0];
@@ -59,21 +69,31 @@
       var slot = tr.dataset.slot;
       var value = +$(evt.target).find(':selected').text();
       console.log(slot, value);
-      this.setState(function(previuosState) {
-        if (type === 'weapon') {
-          var weaponConfig = previuosState.weaponConfig;
-          weaponConfig[+slot].level = value;
+      if (slot === 'f') {
+        this.setState(function(previuosState) {
+          var summonConfig = previuosState.characterConfig.friend;
+          summonConfig.level = value;
           return {
-            weaponConfig: weaponConfig
+            friend: previuosState.characterConfig.friend
           }
-        } else {
-          var summonConfig = previuosState.summonConfig;
-          summonConfig[+slot].level = value;
-          return {
-            summonConfig: summonConfig
+        });
+      } else {
+        this.setState(function(previuosState) {
+          if (type === 'weapon') {
+            var weaponConfig = previuosState.weaponConfig;
+            weaponConfig[+slot].level = value;
+            return {
+              weaponConfig: weaponConfig
+            }
+          } else {
+            var summonConfig = previuosState.summonConfig;
+            summonConfig[+slot].level = value;
+            return {
+              summonConfig: summonConfig
+            }
           }
-        }
-      });
+        });
+      }
     },
     onWeaponSkillLevelChange: function(evt) {
       var tr = $(evt.target).closest('tr')[0];
@@ -270,6 +290,8 @@
           var summonConfig = characterConfig.friend;
           summonConfig.id = id;
           summonConfig.limit = limit;
+          summonConfig.level = 100;
+          summonConfig.plus = 0;
           return {
             characterConfig: characterConfig
           };
@@ -370,8 +392,11 @@
       var friendSummonDOM = '';
       if (this.state.characterConfig.friend.id) {
         var data = SummonStore.getData(this.state.characterConfig.friend);
+        var realData = SummonStore.calculateRealData(this.state.characterConfig.friend);
         var add = SummonStore.calculateSummonBonus(this.state.characterConfig.friend);
         this.addBonus(totalBonus, add);
+        totalSummonAtk += realData.attack;
+        totalSummonHp += realData.hp;
         friendSummonDOM =
         <div className="prt-deck-select" onClick={this.chooseFriend}>
         <div className="lis-deck">
@@ -440,7 +465,19 @@
             starDOM = <div className="prt-evolution-star-s">
                         <div className="prt-star-on"></div><div className="prt-star-on"></div><div className="prt-star-on"></div><div className="prt-ultimate-star-on"></div>
                       </div>;
-          }
+          } else if (weapon.level > 80) {
+            starDOM = <div className="prt-evolution-star-s">
+                        <div className="prt-star-on"></div><div className="prt-star-on"></div><div className="prt-star-on"></div>
+                      </div>;
+          } else if (weapon.level > 80) {
+            starDOM = <div className="prt-evolution-star-s">
+                        <div className="prt-star-on"></div><div className="prt-star-on"></div>
+                      </div>;
+          } else if (weapon.level > 40) {
+            starDOM = <div className="prt-evolution-star-s">
+                        <div className="prt-star-on"></div>
+                      </div>;
+          } 
           return  <div className="lis-weapon-sub" data-slot={index}>
               <div className="btn-weapon rarity-4">
                 <img className="img-weapon-sub" src={"http://gbf.game-a.mbga.jp/assets/img/sp/assets/weapon/m/"+weapon.id+".jpg"} />
@@ -497,6 +534,7 @@
             </div>
           </div>
       } else {
+        var weapon = this.state.weaponConfig[0];
         var weaponData = WeaponStore.getData(this.state.weaponConfig[0]);
         var realData = WeaponStore.calculateRealData(this.state.weaponConfig[0]);
         var realAtk = realData.attack;
@@ -508,6 +546,18 @@
         if (weaponData.limit === 4) {
           starDOM = <div className="prt-evolution-star-s">
                       <div className="prt-star-on"></div><div className="prt-star-on"></div><div className="prt-star-on"></div><div className="prt-ultimate-star-on"></div>
+                    </div>;
+        } else if (weapon.level > 80) {
+          starDOM = <div className="prt-evolution-star-s">
+                      <div className="prt-star-on"></div><div className="prt-star-on"></div><div className="prt-star-on"></div>
+                    </div>;
+        } else if (weapon.level > 60) {
+          starDOM = <div className="prt-evolution-star-s">
+                      <div className="prt-star-on"></div><div className="prt-star-on"></div>
+                    </div>;
+        } else if (weapon.level > 40) {
+          starDOM = <div className="prt-evolution-star-s">
+                      <div className="prt-star-on"></div><div className="prt-star-on"></div>
                     </div>;
         }
         mainWeaponDOM = 
@@ -543,6 +593,7 @@
       }
       var mainSummonDOM = '';
       if (this.state.summonConfig[0].id) {
+        var summon = this.state.summonConfig[0];
         var summonData = SummonStore.getData(this.state.summonConfig[0]);
         var realData = SummonStore.calculateRealData(this.state.summonConfig[0]);
         var realAtk = realData.attack;
@@ -560,6 +611,14 @@
         } else if (summonData.limit === 3) {
           starDOM = <div className="prt-evolution-star-s">
                       <div className="prt-star-on"></div><div className="prt-star-on"></div><div className="prt-star-on"></div>
+                    </div>;
+        } else if (summon.level > 60) {
+          starDOM = <div className="prt-evolution-star-s">
+                      <div className="prt-star-on"></div><div className="prt-star-on"></div>
+                    </div>;
+        } else if (summon.level > 40) {
+          starDOM = <div className="prt-evolution-star-s">
+                      <div className="prt-star-on"></div>
                     </div>;
         }
         mainSummonDOM = <div className="cnt-summon-main">
@@ -636,6 +695,14 @@
           } else if (summonData.limit === 3) {
             starDOM = <div className="prt-evolution-star-s">
                         <div className="prt-star-on"></div><div className="prt-star-on"></div><div className="prt-star-on"></div>
+                      </div>;
+          } else if (summon.level > 60) {
+            starDOM = <div className="prt-evolution-star-s">
+                        <div className="prt-star-on"></div><div className="prt-star-on"></div>
+                      </div>;
+          } else if (summon.level > 40) {
+            starDOM = <div className="prt-evolution-star-s">
+                        <div className="prt-star-on"></div>
                       </div>;
           }
           return <div className="lis-summon-sub">
@@ -735,21 +802,32 @@
             WeaponStore.getData(this.state.weaponConfig[0]).attribute : 1;
         var magnaPercentage = 1 + totalAmount[mainAttribute - 1].magna/100 * (totalBonus[mainAttribute - 1].magna / 100);
         var normalPercentage = 1 + (totalBonus[mainAttribute - 1].character + totalAmount[mainAttribute - 1].baha + totalAmount[mainAttribute - 1].normal * (totalBonus[mainAttribute - 1].normal / 100))/100 ;
+        var baha
         var unknownPercentage = 1 + totalAmount[mainAttribute - 1].unknown/100 * (totalBonus[mainAttribute - 1].unknown / 100);
         var calculatedAtk = (totalSummonAtk + totalWeaponAtk + rankAtk) * magnaPercentage * normalPercentage * unknownPercentage;
         amountDOM = <div className="emulator amount">
-                      {'基礎攻擊:(' + (totalWeaponAtk + totalSummonAtk)}
+                      <sup>基礎攻擊</sup>
+                      {'(' + (totalWeaponAtk + totalSummonAtk)}
                       <span className="operator"> + </span>
                       { (rankAtk) +')'}
                       <span className="operator"> X </span>
-                      {'一般:' + (100 + totalAmount[mainAttribute - 1].normal) + '%'}
+                      <sup>一般</sup>
+                      {'(' + (100 + totalAmount[mainAttribute - 1].normal)}
+                      <sub>普刃</sub>+
+                      {totalAmount[mainAttribute - 1].baha}
+                      <sub>巴哈</sub>+
+                      {totalBonus[mainAttribute - 1].character + '%'}
+                      <sub>角色</sub>)+
                       <span className="operator"> X </span>
-                      {'UN: ' + (100 + totalAmount[mainAttribute - 1].unknown) + '%'}
+                      <sup>UN</sup>
+                      {'(' + (100 + totalAmount[mainAttribute - 1].unknown) + '%)'}
                       <span className="operator"> X </span>
-                      {'方陣: ' + (100 + totalAmount[mainAttribute - 1].magna) + '*' + (totalBonus[mainAttribute - 1].magna) + '%'}
+                      <sup>方陣</sup>
+                      {'(' + (100 + totalAmount[mainAttribute - 1].magna) + '*' + (totalBonus[mainAttribute - 1].magna) + '%)'}
                       <span className="operator"> = </span>
                       <br/>
-                      {'總合攻擊: ' + Math.round(calculatedAtk)}
+                      <sup>總合攻擊</sup>
+                      {'' + Math.round(calculatedAtk)}
                     </div>
       }
       var summonConfigDOM = '';
@@ -789,13 +867,36 @@
                 </td>
                       <td>{index + 1}</td>
                       <td>{summonData.name}</td>
-                      <td><select className="level" onChange={this.onLevelChange}>{summonData.limit === 4 ? from150 : summonData.limit === 3 ? from100 : from80}</select></td>
-                      <td><select className="plus" onChange={this.onPlusChange}>{from99}</select></td>
+                      <td><select className="level" value={summon.level} onChange={this.onLevelChange}>{summonData.limit === 4 ? from150 : summonData.limit === 3 ? from100 : from80}</select></td>
+                      <td><select className="plus" value={summon.plus} onChange={this.onPlusChange}>{from99}</select></td>
                       <td>{starDOM}</td>
                    </tr>);
           } else {
           }
         }, this);
+        if (this.state.characterConfig.friend.id) {
+          var summon = this.state.characterConfig.friend;
+          var summonData = SummonStore.getData(this.state.characterConfig.friend);
+          var starDOM = '';
+          if (summonData.limit === 4) {
+            starDOM = <div className="prt-evolution-star-s">
+                        <div className="prt-star-on"></div><div className="prt-star-on"></div><div className="prt-star-on"></div><div className="prt-ultimate-star-on"></div>
+                      </div>;
+          } else if (summonData.limit === 3) {
+            starDOM = <div className="prt-evolution-star-s">
+                        <div className="prt-star-on"></div><div className="prt-star-on"></div><div className="prt-star-on"></div>
+                      </div>;
+          }
+          rows.push(<tr data-type="summon" data-slot='f' key={"summon-config-friend"}>
+                    <td className="list-item"><img src={"http://gbf.game-a.mbga.jp/assets/img/sp/assets/summon/party_sub/"+summonData.id+".jpg"} />
+              </td>
+                    <td>Friend</td>
+                    <td>{summonData.name}</td>
+                    <td><select className="level" value={summon.level} onChange={this.onLevelChange}>{summonData.limit === 4 ? from150 : summonData.limit === 3 ? from100 : from80}</select></td>
+                    <td><select className="plus" value={summon.plus} onChange={this.onPlusChange}>{from99}</select></td>
+                    <td>{starDOM}</td>
+                 </tr>);
+        }
         summonConfigDOM = <table className="table table-condensed table-striped table-hover">
                             <thead><tr><th></th><th>Slot</th><th>Name</th><th>level</th><th>Plus</th><th>Over limit</th></tr></thead>
                             <tbody>{rows}</tbody>
@@ -804,11 +905,25 @@
       var characterConfigDOM = 
         <form className="form-inline">
           <div className="form-group">
-            <button onClick={this.saveConfigToHash} className="btn btn-info" id="friend">Generate link/產生連結</button><input className="form-control"  ref="link" readonly="true" />
+            <button onClick={this.saveConfigToHash} className="btn btn-info" id="friend">Generate link/產生連結</button><input className="form-control"  ref="link" readonly="true" value={window.location.href} />
           </div>
         </form>
 
       return <div className="planner">
+              <header>
+                <nav className="navbar navbar-inverse">
+                  <div className="container-fluid">
+                    <div className="navbar-header">
+                      <a className="navbar-brand" href="#">
+                      <sup>@Cygames, Inc</sup>
+                        Granblue Fantasy Planner <sub><span className="label label-warning label-sm">v0.0.1BETA</span></sub>
+                      </a>
+                      <p className="navbar-text">by <a href="http://github.com/alivedise">alivedise</a></p>
+
+                    </div>
+                  </div>
+                </nav>
+              </header>
               {friendSummonDOM}
               <div className="cnt-index" onMouseOut={this.onMouseOut}  onMouseDown={this.onMouseDown}  onMouseUp={this.onMouseUp} onClick={this.onClick}>
                 <div className="cnt-weapon-list">

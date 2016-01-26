@@ -91,3 +91,19 @@
 .emulator .operator {
   font-size: 10px;
 }
+
+#app {
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+}
+
+#fake-bg {
+  background: url(http://granbluefantasy.jp/common/images/bg_static.jpg) no-repeat center center;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 500px;
+  position: absolute;
+  pointer-events: none;
+}
