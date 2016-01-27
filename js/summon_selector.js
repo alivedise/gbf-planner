@@ -89,6 +89,19 @@
           )
         );
       });
+
+      dom.unshift(React.createElement(
+        'tr',
+        { key: 'summon-deselect', className: 'list-item', 'data-id': '', 'data-limit': '0' },
+        React.createElement('td', null),
+        React.createElement(
+          'td',
+          null,
+          'Cancel Choose/取消目前選擇'
+        ),
+        React.createElement('td', null),
+        React.createElement('td', null)
+      ));
       return React.createElement(
         'div',
         { className: 'modal fade', tabindex: '-1', role: 'dialog' },

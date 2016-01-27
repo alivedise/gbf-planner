@@ -84,7 +84,6 @@
       var label = $(evt.target).closest('label')[0];
       var input = label.querySelector('input');
       if (input) {
-        //input.checked = label.classList.contains('active');
         $(input).trigger('change');
         this.onFilterChange();
       }
@@ -120,6 +119,12 @@
                 </tr>
         }
       }, this);
+      dom.unshift(<tr key={'weapon-deselect'} className="list-item" data-id="" data-limit="0">
+                  <td></td>
+                  <td>Cancel Choose/取消目前選擇</td>
+                  <td></td>
+                  <td></td>
+                </tr>)
       return <div className="modal fade" tabindex="-1" role="dialog">
               <div className="modal-dialog">
                 <div className="modal-content">

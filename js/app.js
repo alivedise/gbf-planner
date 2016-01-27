@@ -172,7 +172,6 @@
           var a = result.split(':');
           var id = a[0];
           var limit = a[1];
-          console.log(id, limit);
           this.setState(function (currentState) {
             var weaponConfig = currentState.weaponConfig[slot];
             weaponConfig.id = id;
@@ -1473,7 +1472,7 @@
                     React.createElement(
                       'span',
                       { className: 'label label-warning label-sm' },
-                      'v0.0.1BETA RC6'
+                      'v0.0.1BETA RC7'
                     )
                   )
                 ),
