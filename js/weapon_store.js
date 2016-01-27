@@ -340,6 +340,8 @@
             break;
           case 'ヒューマンアニムス・ウィス':
           case 'ヒュムアニムス・ウィス':
+          case 'エルンアニムス・ウィス':
+          case 'ドーラアニムス・ウィス':
             total.forEach(function(a) {
               if (skillLevel === 10) {
                 skillLevel = 11;
@@ -348,6 +350,7 @@
             });
             break;
           case 'コンキリオ・ルーベル':
+          case 'コンキリオ・ケルレウス':
             total.forEach(function(a) {
               if (skillLevel === 10) {
                 skillLevel = 11;
