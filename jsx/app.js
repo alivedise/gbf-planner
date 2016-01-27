@@ -923,7 +923,7 @@
                     <div className="navbar-header">
                       <a className="navbar-brand" href="#">
                       <sup>@Cygames, Inc</sup>
-                        Granblue Fantasy Planner <sub><span className="label label-warning label-sm">v0.0.1BETA RC7</span></sub>
+                        Granblue Fantasy Planner <sub><span className="label label-warning label-sm">v0.0.1BETA RC8</span></sub>
                       </a>
                       <p className="navbar-text">by <a href="http://github.com/alivedise">alivedise</a></p>
 
