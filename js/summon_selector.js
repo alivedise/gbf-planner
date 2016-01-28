@@ -12,7 +12,7 @@
     },
     getInitialState: function getInitialState() {
       return {
-        attributes: ['1', '2', '3', '4', '5', '6']
+        attributes: []
       };
     },
     componentDidMount: function componentDidMount() {
@@ -43,6 +43,24 @@
       this.resolve && this.resolve(activeNow.dataset.id + ':' + activeNow.dataset.limit);
       $(this.getDOMNode()).modal('hide');
     },
+    onFilterChange: function onFilterChange() {
+      var attributes = [];
+
+      $("input[name='attributes']:checked").each(function () {
+        attributes.push($(this).val());
+      });
+      this.setState({
+        attributes: attributes
+      });
+    },
+    onFilterClick: function onFilterClick(evt) {
+      var label = $(evt.target).closest('label')[0];
+      var input = label.querySelector('input');
+      if (input) {
+        $(input).trigger('change');
+        this.onFilterChange();
+      }
+    },
     render: function render() {
       var dom = this.props.summons.map(function (summon) {
         var starDOM = '';
@@ -63,6 +81,11 @@
             React.createElement('div', { className: 'prt-star-on' }),
             React.createElement('div', { className: 'prt-star-on' })
           );
+        }
+        if (this.state.attributes.length) {
+          if (this.state.attributes.indexOf('' + SummonStore.getElementAttribute(summon[2])) < 0) {
+            return '';
+          }
         }
         return React.createElement(
           'tr',
@@ -88,7 +111,7 @@
             starDOM
           )
         );
-      });
+      }, this);
 
       dom.unshift(React.createElement(
         'tr',
@@ -127,6 +150,50 @@
                 'h4',
                 { className: 'modal-title' },
                 'Select Summon'
+              ),
+              React.createElement(
+                'form',
+                null,
+                React.createElement(
+                  'div',
+                  { className: 'btn-group', 'data-toggle': 'buttons', onClick: this.onFilterClick },
+                  React.createElement(
+                    'label',
+                    { className: 'btn btn-info', htmlFor: 'attribute-1' },
+                    React.createElement('input', { type: 'checkbox', id: 'attribute-1', name: 'attributes', value: '1', autocomplete: 'off', onChange: this.onFilterChange }),
+                    '火'
+                  ),
+                  React.createElement(
+                    'label',
+                    { className: 'btn btn-info', htmlFor: 'attribute-2' },
+                    React.createElement('input', { type: 'checkbox', id: 'attribute-2', name: 'attributes', value: '2', autocomplete: 'off', onChange: this.onFilterChange }),
+                    '水'
+                  ),
+                  React.createElement(
+                    'label',
+                    { className: 'btn btn-info', htmlFor: 'attribute-3' },
+                    React.createElement('input', { type: 'checkbox', id: 'attribute-3', name: 'attributes', value: '3', autocomplete: 'off', onChange: this.onFilterChange }),
+                    '土'
+                  ),
+                  React.createElement(
+                    'label',
+                    { className: 'btn btn-info', htmlFor: 'attribute-4' },
+                    React.createElement('input', { type: 'checkbox', id: 'attribute-4', name: 'attributes', value: '4', autocomplete: 'off', onChange: this.onFilterChange }),
+                    '風'
+                  ),
+                  React.createElement(
+                    'label',
+                    { className: 'btn btn-info', htmlFor: 'attribute-5' },
+                    React.createElement('input', { type: 'checkbox', id: 'attribute-5', name: 'attributes', value: '5', autocomplete: 'off', onChange: this.onFilterChange }),
+                    '光'
+                  ),
+                  React.createElement(
+                    'label',
+                    { className: 'btn btn-info', htmlFor: 'attribute-6' },
+                    React.createElement('input', { type: 'checkbox', id: 'attribute-6', name: 'attributes', value: '6', autocomplete: 'off', onChange: this.onFilterChange }),
+                    '闇'
+                  )
+                )
               )
             ),
             React.createElement(
@@ -135,7 +202,11 @@
               React.createElement(
                 'table',
                 { ref: 'table', onClick: this.onClick, className: 'table table-condensed table-striped' },
-                dom
+                React.createElement(
+                  'tbody',
+                  null,
+                  dom
+                )
               )
             ),
             React.createElement(

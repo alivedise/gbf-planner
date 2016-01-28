@@ -530,6 +530,11 @@
           total[3].attribute += 25;
           total[4].attribute += 25;
         }
+      } else if (data.name.indexOf('Flam=glass') >= 0) {
+        if (config.limit > 3) {
+          total[0].character += 60;
+          total[1].character += 60;
+        }
       }
       return total;
     },
