@@ -820,7 +820,9 @@
                       <span className="operator"> X </span>
                       <sup>一般</sup>
                       {'(' + (100 + totalAmount[mainAttribute - 1].normal)}
-                      %<sub>普刃</sub>+
+                      %<sub>普刃</sub>*
+                      {(totalBonus[mainAttribute - 1].normal) + '%'}
+                      <sub>普刃召喚加成</sub>+
                       {totalAmount[mainAttribute - 1].baha}
                       %<sub>巴哈</sub>+
                       {totalBonus[mainAttribute - 1].character + '%'}
@@ -830,7 +832,8 @@
                       {'(' + (100 + totalAmount[mainAttribute - 1].unknown) + '%)'}
                       <span className="operator"> X </span>
                       <sup>方陣</sup>
-                      {'(' + (100 + totalAmount[mainAttribute - 1].magna) + '*' + (totalBonus[mainAttribute - 1].magna) + '%)'}
+                      {'(' + (totalAmount[mainAttribute - 1].magna) + '%*' + (totalBonus[mainAttribute - 1].magna) + '%'}
+                      <sub>方陣召喚加成</sub>)
                       <span className="operator"> = </span>
                       <br/>
                       <sup>總合攻擊</sup>
@@ -923,7 +926,7 @@
                     <div className="navbar-header">
                       <a className="navbar-brand" href="#">
                       <sup>@Cygames, Inc</sup>
-                        Granblue Fantasy Planner <sub><span className="label label-warning label-sm">v0.0.1BETA RC9</span></sub>
+                        Granblue Fantasy Planner <sub><span className="label label-warning label-sm">v0.0.1BETA RC10</span></sub>
                       </a>
                       <p className="navbar-text">by <a href="http://github.com/alivedise">alivedise</a></p>
 

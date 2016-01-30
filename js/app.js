@@ -1156,6 +1156,13 @@
             null,
             '普刃'
           ),
+          '*',
+          totalBonus[mainAttribute - 1].normal + '%',
+          React.createElement(
+            'sub',
+            null,
+            '普刃召喚加成'
+          ),
           '+',
           totalAmount[mainAttribute - 1].baha,
           '%',
@@ -1193,7 +1200,13 @@
             null,
             '方陣'
           ),
-          '(' + (100 + totalAmount[mainAttribute - 1].magna) + '*' + totalBonus[mainAttribute - 1].magna + '%)',
+          '(' + totalAmount[mainAttribute - 1].magna + '%*' + totalBonus[mainAttribute - 1].magna + '%',
+          React.createElement(
+            'sub',
+            null,
+            '方陣召喚加成'
+          ),
+          ')',
           React.createElement(
             'span',
             { className: 'operator' },
@@ -1472,7 +1485,7 @@
                     React.createElement(
                       'span',
                       { className: 'label label-warning label-sm' },
-                      'v0.0.1BETA RC9'
+                      'v0.0.1BETA RC10'
                     )
                   )
                 ),
