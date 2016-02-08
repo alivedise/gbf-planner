@@ -233,10 +233,8 @@
           case '騎解方陣・神威':
             if (skillLevel <= 10) {
               total[4].magna += (skillLevel);
-              total[4].normal += (skillLevel);
             } else {
               total[4].magna += (skillLevel);
-              total[4].normal += (skillLevel);
             }
             break;
           case '紅蓮の攻刃':
