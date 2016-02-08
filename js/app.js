@@ -1485,7 +1485,7 @@
                     React.createElement(
                       'span',
                       { className: 'label label-warning label-sm' },
-                      'v0.0.1BETA RC10'
+                      'v0.0.1BETA RC11'
                     )
                   )
                 ),

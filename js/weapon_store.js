@@ -235,8 +235,8 @@
               total[4].magna += (skillLevel);
               total[4].normal += (skillLevel);
             } else {
-              total[4].magna += (15 + 0.5 * (skillLevel - 10));
-              total[4].normal += (15 + 0.5 * (skillLevel - 10));
+              total[4].magna += (10 + skillLevel);
+              total[4].normal += (10 + skillLevel);
             }
             break;
           case '紅蓮の攻刃':
